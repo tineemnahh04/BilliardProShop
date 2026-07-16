@@ -1,29 +1,15 @@
 {
-  "name": "back-end",
+  "name": "billiard-app",
   "version": "1.0.0",
-  "description": "RESTFul API Application - Given",
-  "main": "server.js",
+  "private": true,
   "scripts": {
-    "start": "nodemon server"
-  },
-  "keywords": [
-    "nodejs",
-    "restful",
-    "api"
-  ],
-  "author": "FPTU HN",
-  "license": "ISC",
-  "dependencies": {
-    "bcryptjs": "^3.0.2",
-    "body-parser": "^1.20.3",
-    "cors": "^2.8.5",
-    "dotenv": "^16.4.7",
-    "express": "^4.21.2",
-    "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.10.1",
-    "morgan": "^1.10.0"
+    "install:all": "npm install --prefix FE && npm install --prefix BE",
+    "dev": "concurrently \"npm run dev --prefix FE\" \"npm run dev --prefix BE\"",
+    "dev:fe": "npm run dev --prefix FE",
+    "dev:be": "npm run dev --prefix BE",
+    "build:fe": "npm run build --prefix FE"
   },
   "devDependencies": {
-    "nodemon": "^3.1.9"
+    "concurrently": "^8.2.2"
   }
 }
