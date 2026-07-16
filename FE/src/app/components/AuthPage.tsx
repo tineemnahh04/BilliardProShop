@@ -55,6 +55,7 @@ export function AuthPage({ onLoginSuccess }: AuthPageProps) {
       } else {
         setSuccess("Đăng nhập thành công!");
         localStorage.setItem("user", JSON.stringify(data.user));
+        localStorage.setItem("token", data.token);
         onLoginSuccess(data.user);
         
         // Redirect logic based on role

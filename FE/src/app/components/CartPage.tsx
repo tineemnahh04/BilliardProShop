@@ -19,19 +19,41 @@ export function CartPage({ cartItems, updateQty, removeFromCart }: CartPageProps
   const [coupon, setCoupon] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState("");
   const [couponError, setCouponError] = useState("");
+  const [discountValue, setDiscountValue] = useState(0);
+  const [discountType, setDiscountType] = useState("percentage");
 
   const subtotal = cartItems.reduce((sum, i) => sum + i.price * i.quantity, 0);
-  const discount = appliedCoupon === "PROSHOT" ? subtotal * 0.1 : 0;
+  const discount = discountType === "percentage" ? subtotal * (discountValue / 100) : discountValue;
   const shipping = subtotal >= 150 ? 0 : 12.99;
   const total = subtotal - discount + shipping;
 
   const applyCoupon = () => {
-    if (coupon.toUpperCase() === "PROSHOT") {
-      setAppliedCoupon("PROSHOT");
-      setCouponError("");
-    } else {
-      setCouponError("Mã giảm giá không hợp lệ. Hãy dùng mã PROSHOT để giảm 10%.");
-    }
+    setCouponError("");
+    fetch('/api/coupons/validate', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem("token") || ""}`
+      },
+      body: JSON.stringify({ code: coupon, subtotal })
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.isValid) {
+          setAppliedCoupon(data.code);
+          setDiscountValue(data.discount);
+          setDiscountType(data.type);
+          setCouponError("");
+        } else {
+          setCouponError(data.message || "Mã giảm giá không hợp lệ");
+          setAppliedCoupon("");
+          setDiscountValue(0);
+        }
+      })
+      .catch(err => {
+        console.error("Lỗi áp dụng coupon:", err);
+        setCouponError("Không thể kết nối đến server");
+      });
   };
 
   if (cartItems.length === 0) {

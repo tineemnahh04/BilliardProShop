@@ -67,58 +67,59 @@ export function ProductListingPage({ addToCart, wishlist, toggleWishlist }: Prod
   const catParam = searchParams.get("cat") || "";
   const brandParam = searchParams.get("brand") || "";
 
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalProducts, setTotalProducts] = useState(0);
+
+  // Reset page to 1 when filters or search keyword changes
   useEffect(() => {
-    fetch('/api/products')
+    setPage(1);
+  }, [q, catParam, brandParam, filters.brands, filters.minPrice, filters.maxPrice, filters.rating, filters.inStockOnly, sortBy]);
+
+  useEffect(() => {
+    setLoading(true);
+    const params = new URLSearchParams();
+    
+    if (q) params.set("q", q);
+    if (catParam) params.set("category", catParam);
+    
+    if (brandParam && brandParam !== "all") {
+      params.set("brand", brandParam);
+    } else if (filters.brands.length > 0) {
+      params.set("brand", filters.brands.join(","));
+    }
+    
+    if (filters.minPrice > 0) params.set("minPrice", filters.minPrice.toString());
+    if (filters.maxPrice < 600) params.set("maxPrice", filters.maxPrice.toString());
+    if (filters.rating > 0) params.set("rating", filters.rating.toString());
+    if (filters.inStockOnly) params.set("inStockOnly", "true");
+    if (sortBy) params.set("sort", sortBy);
+    
+    params.set("page", page.toString());
+    params.set("limit", "9");
+
+    fetch(`/api/products?${params.toString()}`)
       .then(res => res.json())
       .then(data => {
-        setProducts(data);
+        if (data.products) {
+          setProducts(data.products);
+          setTotalPages(data.pages || 1);
+          setTotalProducts(data.total || 0);
+        } else {
+          // Fallback if API returned plain array
+          setProducts(data);
+          setTotalPages(1);
+          setTotalProducts(data.length);
+        }
         setLoading(false);
       })
       .catch(err => {
         console.error('Lỗi tải sản phẩm:', err);
         setLoading(false);
       });
-  }, []);
+  }, [q, catParam, brandParam, filters, sortBy, page]);
 
-  const filtered = useMemo(() => {
-    let list = [...products];
-
-    if (q) {
-      list = list.filter((p) => 
-        p.name.toLowerCase().includes(q.toLowerCase()) || 
-        p.brand.toLowerCase().includes(q.toLowerCase())
-      );
-    }
-    if (catParam) {
-      list = list.filter((p) => p.category === catParam);
-    }
-    if (brandParam && brandParam !== "all") {
-      list = list.filter((p) => p.brand.toLowerCase() === brandParam.toLowerCase());
-    }
-    if (filters.brands.length) {
-      list = list.filter((p) => filters.brands.includes(p.brand));
-    }
-    if (filters.inStockOnly) {
-      list = list.filter((p) => p.inStock);
-    }
-    if (filters.rating) {
-      list = list.filter((p) => p.rating >= filters.rating);
-    }
-    list = list.filter((p) => p.price >= filters.minPrice && p.price <= filters.maxPrice);
-
-    switch (sortBy) {
-      case "price-asc": 
-        return list.sort((a, b) => a.price - b.price);
-      case "price-desc": 
-        return list.sort((a, b) => b.price - a.price);
-      case "rating": 
-        return list.sort((a, b) => b.rating - a.rating);
-      case "new": 
-        return list.sort((a, b) => (b.badge === "Mới về" ? 1 : 0) - (a.badge === "Mới về" ? 1 : 0));
-      default: 
-        return list;
-    }
-  }, [products, filters, sortBy, q, catParam, brandParam]);
+  const filtered = products;
 
   const toggleBrand = (brand: string) => {
     setFilters((f) => ({
@@ -423,21 +424,24 @@ export function ProductListingPage({ addToCart, wishlist, toggleWishlist }: Prod
           )}
 
           {/* Pagination */}
-          <div className="flex items-center justify-center gap-2 mt-12">
-            {[1, 2, 3].map((p) => (
-              <button
-                key={p}
-                className="w-9 h-9 rounded-lg text-sm font-medium transition-all"
-                style={{
-                  background: p === 1 ? "linear-gradient(135deg, #D4AF37, #A88920)" : "#1E293B",
-                  color: p === 1 ? "#0F172A" : "#94A3B8",
-                  border: p === 1 ? "none" : "1px solid rgba(212,175,55,0.15)",
-                }}
-              >
-                {p}
-              </button>
-            ))}
-          </div>
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-2 mt-12">
+              {Array.from({ length: totalPages }, (_, idx) => idx + 1).map((p) => (
+                <button
+                  key={p}
+                  onClick={() => setPage(p)}
+                  className="w-9 h-9 rounded-lg text-sm font-medium transition-all"
+                  style={{
+                    background: p === page ? "linear-gradient(135deg, #D4AF37, #A88920)" : "#1E293B",
+                    color: p === page ? "#0F172A" : "#94A3B8",
+                    border: p === page ? "none" : "1px solid rgba(212,175,55,0.15)",
+                  }}
+                >
+                  {p}
+                </button>
+              ))}
+            </div>
+          )}
         </main>
       </div>
     </div>

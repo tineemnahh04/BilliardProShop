@@ -29,33 +29,59 @@ export function CheckoutPage({ cartItems, clearCart, currentUser }: CheckoutPage
       firstName: firstName,
       lastName: lastName,
       email: currentUser?.email || "",
-      phone: "+84 912 345 678",
-      address: "12 Đường Ba Tháng Hai",
+      phone: currentUser?.phone || "+84 912 345 678",
+      address: currentUser?.address || "12 Đường Ba Tháng Hai",
       city: "TP. Hồ Chí Minh",
       state: "Quận 10",
       zip: "700000",
-      country: "Việt Nam",
+      country: "Việt Nam"
     };
   });
   
   const [paymentMethod, setPaymentMethod] = useState("vnpay");
   const [couponCode, setCouponCode] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState("");
+  const [discountValue, setDiscountValue] = useState(0);
+  const [discountType, setDiscountType] = useState("percentage");
+  const [couponError, setCouponError] = useState("");
   const [completed, setCompleted] = useState(false);
   const [createdOrder, setCreatedOrder] = useState<any>(null);
   const [loading, setLoading] = useState(false);
 
   const subtotal = cartItems.reduce((s, i) => s + i.price * i.quantity, 0);
-  const discount = appliedCoupon === "PROSHOT" ? subtotal * 0.1 : 0;
+  const discount = discountType === "percentage" ? subtotal * (discountValue / 100) : discountValue;
   const shipping = subtotal >= 150 ? 0 : 12.99;
   const total = subtotal - discount + shipping;
 
   const updateForm = (key: string, value: string) => setForm((f) => ({ ...f, [key]: value }));
 
   const applyCoupon = () => {
-    if (couponCode.toUpperCase() === "PROSHOT") {
-      setAppliedCoupon("PROSHOT");
-    }
+    setCouponError("");
+    fetch('/api/coupons/validate', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem("token") || ""}`
+      },
+      body: JSON.stringify({ code: couponCode, subtotal })
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.isValid) {
+          setAppliedCoupon(data.code);
+          setDiscountValue(data.discount);
+          setDiscountType(data.type);
+          setCouponError("");
+        } else {
+          setCouponError(data.message || "Mã giảm giá không hợp lệ");
+          setAppliedCoupon("");
+          setDiscountValue(0);
+        }
+      })
+      .catch(err => {
+        console.error("Lỗi áp dụng coupon:", err);
+        setCouponError("Không thể kết nối đến server");
+      });
   };
 
   const handlePlaceOrder = () => {
@@ -80,7 +106,8 @@ export function CheckoutPage({ cartItems, clearCart, currentUser }: CheckoutPage
     fetch('/api/orders', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem("token") || ""}`
       },
       body: JSON.stringify(orderData)
     })
@@ -411,7 +438,12 @@ export function CheckoutPage({ cartItems, clearCart, currentUser }: CheckoutPage
                 Áp dụng
               </button>
             </div>
-            {appliedCoupon && <p className="text-xs text-green-500 mb-3">✓ Đã áp dụng mã giảm giá 10%!</p>}
+            {couponError && <p className="text-xs text-red-500 mb-3">⚠ {couponError}</p>}
+            {appliedCoupon && (
+              <p className="text-xs text-green-500 mb-3">
+                ✓ Đã áp dụng mã giảm giá {appliedCoupon} (-{discountType === 'percentage' ? `${discountValue}%` : `$${discountValue}`})!
+              </p>
+            )}
 
             <div className="pt-4 border-t space-y-2" style={{ borderColor: "rgba(212,175,55,0.1)" }}>
               <div className="flex justify-between text-sm">

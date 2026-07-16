@@ -1,29 +1,46 @@
-import { OrderModel } from '../models/orderModel.js';
-import { ProductModel } from '../models/productModel.js';
-import { CustomerModel } from '../models/customerModel.js';
+import { Order } from '../models/orderModel.js';
+import { Product } from '../models/productModel.js';
+import { User } from '../models/userModel.js';
 
 export const analyticsController = {
-  getStats: (req, res) => {
+  getStats: async (req, res) => {
     try {
-      const orders = OrderModel.getAll();
-      const products = ProductModel.getAll();
-      const customers = CustomerModel.getAll();
+      // 1. Thống kê KPI sử dụng Aggregation Pipeline trên collection Orders
+      // Tính toán: Doanh thu, Đơn hàng, AOV, SP đã bán
+      const activeOrdersStats = await Order.aggregate([
+        { $match: { status: { $ne: 'Đã hủy' } } },
+        { $unwind: '$items' },
+        {
+          $group: {
+            _id: '$_id',
+            orderTotal: { $first: '$total' },
+            itemQty: { $sum: '$items.qty' }
+          }
+        },
+        {
+          $group: {
+            _id: null,
+            totalRevenue: { $sum: '$orderTotal' },
+            totalOrders: { $sum: 1 },
+            totalProductsSold: { $sum: '$itemQty' }
+          }
+        }
+      ]);
 
-      // 1. Calculate active orders (all except Cancelled/Đã hủy)
-      const activeOrders = orders.filter(o => o.status !== 'Đã hủy');
+      const totalRevenue = activeOrdersStats[0]?.totalRevenue || 0;
+      // Tổng đơn hàng bao gồm cả đơn Đã hủy để hiển thị đúng thực tế
+      const totalOrdersCount = await Order.countDocuments({});
+      const activeOrdersCount = activeOrdersStats[0]?.totalOrders || 0;
       
-      const totalRevenue = activeOrders.reduce((sum, o) => sum + o.total, 0);
-      const totalOrdersCount = orders.length;
-      const totalCustomersCount = customers.length;
-      const avgOrderValue = totalOrdersCount > 0 ? (totalRevenue / activeOrders.length || 0) : 0;
+      // Số lượng khách hàng từ Users Collection
+      const totalCustomersCount = await User.countDocuments({ role: 'customer' });
       
-      const totalProductsSold = activeOrders.reduce((sum, o) => {
-        return sum + o.items.reduce((itemSum, item) => itemSum + item.qty, 0);
-      }, 0);
+      const avgOrderValue = activeOrdersCount > 0 ? (totalRevenue / activeOrdersCount) : 0;
+      const totalProductsSold = activeOrdersStats[0]?.totalProductsSold || 0;
 
-      // KPI cards format
+      // 6 Thẻ KPI chỉ số
       const kpiCards = [
-        { label: "Tổng Doanh Thu", value: `$${totalRevenue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`, change: "+15.2%", trend: "up", sub: "so với năm ngoái", color: "#D4AF37" },
+        { label: "Tổng Doanh Thế", value: `$${totalRevenue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`, change: "+15.2%", trend: "up", sub: "so với năm ngoái", color: "#D4AF37" },
         { label: "Tổng Đơn Hàng", value: totalOrdersCount.toString(), change: "+8.4%", trend: "up", sub: "so với tháng trước", color: "#22C55E" },
         { label: "Tổng Khách Hàng", value: totalCustomersCount.toString(), change: "+6.1%", trend: "up", sub: "so với tháng trước", color: "#3B82F6" },
         { label: "Giá Trị Đơn Trung Bình", value: `$${avgOrderValue.toFixed(2)}`, change: "+2.5%", trend: "up", sub: "so với tháng trước", color: "#F59E0B" },
@@ -31,7 +48,25 @@ export const analyticsController = {
         { label: "Sản Phẩm Đã Bán", value: totalProductsSold.toString(), change: "+12.4%", trend: "up", sub: "so với năm ngoái", color: "#8B5CF6" }
       ];
 
-      // 2. Revenue over months (merge baseline data with actual database orders)
+      // 2. Biểu đồ vùng (Area Chart): Doanh thu theo 12 tháng từ DB
+      // Group bằng phần tử tháng trong chuỗi ngày "DD/MM/YYYY" bằng $split
+      const monthlyRevenueStats = await Order.aggregate([
+        { $match: { status: { $ne: 'Đã hủy' } } },
+        {
+          $project: {
+            month: { $arrayElemAt: [{ $split: ['$date', '/'] }, 1] },
+            total: '$total'
+          }
+        },
+        {
+          $group: {
+            _id: '$month',
+            revenue: { $sum: '$total' },
+            orders: { $sum: 1 }
+          }
+        }
+      ]);
+
       const monthsMap = {
         '01': { month: 'Th1', revenue: 18400, orders: 142 },
         '02': { month: 'Th2', revenue: 22100, orders: 171 },
@@ -47,35 +82,38 @@ export const analyticsController = {
         '12': { month: 'Th12', revenue: 47200, orders: 365 }
       };
 
-      // Add actual orders from database into the monthsMap
-      activeOrders.forEach(order => {
-        if (order.date) {
-          const parts = order.date.split('/');
-          if (parts.length === 3) {
-            const monthCode = parts[1]; // e.g. '06'
-            if (monthsMap[monthCode]) {
-              monthsMap[monthCode].revenue += order.total;
-              monthsMap[monthCode].orders += 1;
-            }
-          }
+      // Cộng dữ liệu thực tế từ database vào map
+      monthlyRevenueStats.forEach(stat => {
+        const m = stat._id;
+        if (monthsMap[m]) {
+          monthsMap[m].revenue += stat.revenue;
+          monthsMap[m].orders += stat.orders;
         }
       });
 
       const revenueData = Object.values(monthsMap);
 
-      // 3. Sales by Category (calculate dynamically based on ordered items)
-      const categorySales = {};
-      let totalItemsSoldForCats = 0;
-
-      activeOrders.forEach(o => {
-        o.items.forEach(item => {
-          // Find category in products DB
-          const p = products.find(prod => prod.id === item.id);
-          const catName = p ? p.category : 'Khác';
-          categorySales[catName] = (categorySales[catName] || 0) + item.qty;
-          totalItemsSoldForCats += item.qty;
-        });
-      });
+      // 3. Biểu đồ tròn (Pie Chart): Doanh số theo danh mục
+      // lookup sản phẩm để lấy trường category
+      const categorySalesStats = await Order.aggregate([
+        { $match: { status: { $ne: 'Đã hủy' } } },
+        { $unwind: '$items' },
+        {
+          $lookup: {
+            from: 'products',
+            localField: 'items.id',
+            foreignField: 'id',
+            as: 'productInfo'
+          }
+        },
+        { $unwind: '$productInfo' },
+        {
+          $group: {
+            _id: '$productInfo.category',
+            qty: { $sum: '$items.qty' }
+          }
+        }
+      ]);
 
       const catDisplayNames = {
         'pool-cues': 'Cơ bida lỗ',
@@ -99,18 +137,20 @@ export const analyticsController = {
         'Danh mục khác': '#64748B'
       };
 
-      let categoryData = Object.entries(categorySales).map(([catKey, qty]) => {
-        const name = catDisplayNames[catKey] || catKey;
-        const percentage = totalItemsSoldForCats > 0 ? Math.round((qty / totalItemsSoldForCats) * 100) : 0;
+      const totalItemsSold = categorySalesStats.reduce((sum, item) => sum + item.qty, 0);
+
+      let categoryData = categorySalesStats.map(stat => {
+        const name = catDisplayNames[stat._id] || stat._id;
+        const percentage = totalItemsSold > 0 ? Math.round((stat.qty / totalItemsSold) * 100) : 0;
         return {
           name,
           value: percentage,
-          qty: qty,
+          qty: stat.qty,
           color: categoryColors[name] || '#64748B'
         };
       }).filter(c => c.value > 0);
 
-      // If empty, supply default visual mock data based on initial orders
+      // Dữ liệu fallback nếu chưa có đơn hàng
       if (categoryData.length === 0) {
         categoryData = [
           { name: "Cơ bida lỗ", value: 42, qty: 42, color: "#D4AF37" },
@@ -122,21 +162,19 @@ export const analyticsController = {
         ];
       }
 
-      // 4. Sales by Brand (calculate dynamically)
-      const brandSales = {};
-      activeOrders.forEach(o => {
-        o.items.forEach(item => {
-          const p = products.find(prod => prod.id === item.id);
-          const brandName = p ? p.brand : (item.brand || 'Khác');
-          if (!brandSales[brandName]) {
-            brandSales[brandName] = { revenue: 0, units: 0 };
+      // 4. Biểu đồ cột (Bar Chart): Doanh số theo brand
+      const brandSalesStats = await Order.aggregate([
+        { $match: { status: { $ne: 'Đã hủy' } } },
+        { $unwind: '$items' },
+        {
+          $group: {
+            _id: '$items.brand',
+            revenue: { $sum: { $multiply: ['$items.price', '$items.qty'] } },
+            units: { $sum: '$items.qty' }
           }
-          brandSales[brandName].revenue += item.price * item.qty;
-          brandSales[brandName].units += item.qty;
-        });
-      });
+        }
+      ]);
 
-      // Default baseline brand data if empty, or merge with baseline
       const baselineBrands = {
         'Predator': { revenue: 145800, units: 523 },
         'Fury': { revenue: 89200, units: 612 },
@@ -146,12 +184,13 @@ export const analyticsController = {
         'Mit Cues': { revenue: 31500, units: 94 }
       };
 
-      Object.entries(brandSales).forEach(([brand, data]) => {
+      brandSalesStats.forEach(stat => {
+        const brand = stat._id || 'Khác';
         if (baselineBrands[brand]) {
-          baselineBrands[brand].revenue += data.revenue;
-          baselineBrands[brand].units += data.units;
+          baselineBrands[brand].revenue += stat.revenue;
+          baselineBrands[brand].units += stat.units;
         } else {
-          baselineBrands[brand] = data;
+          baselineBrands[brand] = { revenue: stat.revenue, units: stat.units };
         }
       });
 
@@ -161,35 +200,37 @@ export const analyticsController = {
         units: data.units
       }));
 
-      // 5. Top Products (calculate dynamically)
-      const productSales = {};
-      activeOrders.forEach(o => {
-        o.items.forEach(item => {
-          if (!productSales[item.id]) {
-            productSales[item.id] = { name: item.name, brand: item.brand, units: 0, revenue: 0 };
+      // 5. Bảng xếp hạng Top 5 sản phẩm bán chạy nhất
+      const topProductsStats = await Order.aggregate([
+        { $match: { status: { $ne: 'Đã hủy' } } },
+        { $unwind: '$items' },
+        {
+          $group: {
+            _id: '$items.id',
+            name: { $first: '$items.name' },
+            brand: { $first: '$items.brand' },
+            units: { $sum: '$items.qty' },
+            revenue: { $sum: { $multiply: ['$items.price', '$items.qty'] } }
           }
-          productSales[item.id].units += item.qty;
-          productSales[item.id].revenue += item.price * item.qty;
-        });
-      });
+        },
+        { $sort: { units: -1 } },
+        { $limit: 5 }
+      ]);
 
-      // Fetch ratings from product list
-      const topProductsList = Object.entries(productSales).map(([id, data]) => {
-        const p = products.find(prod => prod.id === parseInt(id));
-        return {
-          name: data.name,
-          brand: data.brand,
-          units: data.units,
-          revenue: Math.round(data.revenue),
+      // Bổ sung Rating từ bảng Products
+      const topProducts = [];
+      for (const stat of topProductsStats) {
+        const p = await Product.findOne({ id: stat._id });
+        topProducts.push({
+          name: stat.name,
+          brand: stat.brand,
+          units: stat.units,
+          revenue: Math.round(stat.revenue),
           rating: p ? p.rating : 5.0
-        };
-      });
+        });
+      }
 
-      // Sort by units sold and take top 5
-      topProductsList.sort((a, b) => b.units - a.units);
-      const topProducts = topProductsList.slice(0, 5);
-
-      // Fallback baseline top products if none sold yet
+      // Dữ liệu fallback nếu chưa có sản phẩm nào bán chạy
       if (topProducts.length === 0) {
         topProducts.push(
           { name: "Cơ Bida Predator 2SE 4-Point Pool Cue", brand: "Predator", units: 218, revenue: 76362, rating: 4.9 },
