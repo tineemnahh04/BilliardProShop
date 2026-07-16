@@ -1,24 +1,14 @@
-import { CustomerModel } from '../models/customerModel.js';
+import { User } from '../models/userModel.js';
 
 export const customerController = {
-  getAll: (req, res) => {
+  // Lấy toàn bộ danh sách khách hàng (chỉ dành cho Admin)
+  getAll: async (req, res) => {
     try {
-      const customers = CustomerModel.getAll();
+      // Tìm tất cả người dùng có vai trò là customer
+      const customers = await User.find({ role: 'customer' }).select('-password').sort({ createdAt: -1 });
       res.json(customers);
     } catch (error) {
       res.status(500).json({ message: 'Lỗi khi lấy danh sách khách hàng', error: error.message });
-    }
-  },
-
-  create: (req, res) => {
-    try {
-      if (!req.body.name) {
-        return res.status(400).json({ message: 'Tên khách hàng là bắt buộc' });
-      }
-      const newCustomer = CustomerModel.create(req.body);
-      res.status(201).json(newCustomer);
-    } catch (error) {
-      res.status(500).json({ message: 'Lỗi khi lưu thông tin khách hàng', error: error.message });
     }
   }
 };

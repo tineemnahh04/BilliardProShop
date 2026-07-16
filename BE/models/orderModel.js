@@ -17,13 +17,13 @@ const OrderSchema = new mongoose.Schema({
   phone: { type: String, required: true },
   address: { type: String, required: true },
   date: { type: String, required: true }, // định dạng DD/MM/YYYY
-  status: { type: String, enum: ['Đang xử lý', 'Đang giao hàng', 'Đã giao', 'Đã hủy'], default: 'Đang xử lý' },
+  status: { type: String, enum: ['Đang xử lý', 'Đang giao hàng', 'Đã giao', 'Đã giao hàng', 'Đã hủy'], default: 'Đang xử lý' },
   items: [OrderItemSchema],
   subtotal: { type: Number, required: true },
   shipping: { type: Number, required: true },
   discount: { type: Number, default: 0 },
   total: { type: Number, required: true },
-  payment: { type: String, enum: ['COD', 'MOMO', 'VNPAY'], default: 'COD' }
+  payment: { type: String, default: 'COD' }
 }, {
   timestamps: true
 });
