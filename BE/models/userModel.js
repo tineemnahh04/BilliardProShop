@@ -1,48 +1,39 @@
-import { readDB, writeDB } from './dbHelper.js';
+import mongoose from 'mongoose';
+import bcrypt from 'bcryptjs';
 
-export const UserModel = {
-  getAll: () => {
-    const db = readDB();
-    return db.users || [];
-  },
+const UserSchema = new mongoose.Schema({
+  id: { type: Number, required: true, unique: true },
+  email: { type: String, required: true, unique: true, lowercase: true, trim: true },
+  password: { type: String, required: true },
+  name: { type: String, required: true },
+  role: { type: String, enum: ['customer', 'admin'], default: 'customer' },
+  joined: { type: String, default: () => `Tháng ${new Date().getMonth() + 1}, ${new Date().getFullYear()}` },
+  spent: { type: Number, default: 0 },
+  orders: { type: Number, default: 0 },
+  status: { type: String, enum: ['Đang hoạt động', 'Đang khóa'], default: 'Đang hoạt động' },
+  wishlist: [{ type: Number }], // danh sách ID sản phẩm yêu thích
+  avatar: { type: String, default: '' },
+  address: { type: String, default: '' },
+  phone: { type: String, default: '' }
+}, {
+  timestamps: true
+});
 
-  findByEmail: (email) => {
-    const users = UserModel.getAll();
-    return users.find(u => u.email.toLowerCase() === email.toLowerCase());
-  },
-
-  create: (userData) => {
-    const db = readDB();
-    if (!db.users) db.users = [];
-    
-    const nextId = db.users.length > 0 ? Math.max(...db.users.map(u => u.id)) + 1 : 1;
-    const newUser = {
-      id: nextId,
-      email: userData.email,
-      password: userData.password,
-      name: userData.name || userData.email.split('@')[0],
-      role: userData.role || 'customer'
-    };
-
-    db.users.push(newUser);
-    
-    // Đồng bộ sang danh sách khách hàng nếu vai trò là customer
-    if (newUser.role === 'customer') {
-      if (!db.customers) db.customers = [];
-      const exists = db.customers.some(c => c.email.toLowerCase() === newUser.email.toLowerCase());
-      if (!exists) {
-        db.customers.push({
-          name: newUser.name,
-          email: newUser.email,
-          orders: 0,
-          spent: 0,
-          status: "Đang hoạt động",
-          joined: `Tháng ${new Date().getMonth() + 1}, ${new Date().getFullYear()}`
-        });
-      }
-    }
-
-    writeDB(db);
-    return newUser;
+// Băm mật khẩu trước khi lưu
+UserSchema.pre('save', async function(next) {
+  if (!this.isModified('password')) return next();
+  try {
+    const salt = await bcrypt.genSalt(10);
+    this.password = await bcrypt.hash(this.password, salt);
+    next();
+  } catch (error) {
+    next(error);
   }
+});
+
+// Phương thức so sánh mật khẩu
+UserSchema.methods.comparePassword = async function(candidatePassword) {
+  return await bcrypt.compare(candidatePassword, this.password);
 };
+
+export const User = mongoose.model('User', UserSchema);
