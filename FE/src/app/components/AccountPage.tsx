@@ -47,6 +47,24 @@ export function AccountPage({ wishlist, toggleWishlist, addToCart, currentUser }
   const [products, setProducts] = useState<any[]>([]);
   const [loadingOrders, setLoadingOrders] = useState(true);
 
+  // States cho đổi mật khẩu
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [securityMessage, setSecurityMessage] = useState("");
+  const [securityError, setSecurityError] = useState("");
+
+  // States cho sửa hồ sơ
+  const [isEditing, setIsEditing] = useState(false);
+  const [profileForm, setProfileForm] = useState({
+    name: currentUser?.name || "",
+    email: currentUser?.email || "",
+    phone: currentUser?.phone || "+84 912 345 678",
+    address: currentUser?.address || "12 Đường Ba Tháng Hai, Quận 10, TP. Hồ Chí Minh"
+  });
+  const [profileMessage, setProfileMessage] = useState("");
+  const [profileError, setProfileError] = useState("");
+
   useEffect(() => {
     // Keep tab in sync with query parameter if it changes
     const tabParam = searchParams.get("tab");
@@ -59,7 +77,11 @@ export function AccountPage({ wishlist, toggleWishlist, addToCart, currentUser }
     if (!currentUser) return;
 
     // Load customer orders for logged-in user dynamically using email
-    fetch(`/api/orders?customerEmail=${encodeURIComponent(currentUser.email)}`)
+    fetch(`/api/orders?customerEmail=${encodeURIComponent(currentUser.email)}`, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token') || ''}`
+      }
+    })
       .then(res => res.json())
       .then(data => {
         setOrders(data);
@@ -85,6 +107,70 @@ export function AccountPage({ wishlist, toggleWishlist, addToCart, currentUser }
   const handleTabChange = (tabId: string) => {
     setActiveTab(tabId);
     setSearchParams({ tab: tabId });
+  };
+
+  const handleUpdateProfile = (e: React.FormEvent) => {
+    e.preventDefault();
+    setProfileMessage("");
+    setProfileError("");
+
+    fetch('/api/auth/profile', {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token') || ''}`
+      },
+      body: JSON.stringify(profileForm)
+    })
+      .then(async res => {
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || "Lỗi cập nhật hồ sơ");
+        return data;
+      })
+      .then(data => {
+        setProfileMessage("Cập nhật hồ sơ thành công!");
+        localStorage.setItem("user", JSON.stringify(data.user));
+        setIsEditing(false);
+        alert("Thông tin cá nhân đã được cập nhật thành công! Trình duyệt sẽ tự tải lại để áp dụng.");
+        window.location.reload();
+      })
+      .catch(err => {
+        setProfileError(err.message);
+      });
+  };
+
+  const handleUpdatePassword = (e: React.FormEvent) => {
+    e.preventDefault();
+    setSecurityMessage("");
+    setSecurityError("");
+
+    if (newPassword !== confirmPassword) {
+      setSecurityError("Xác nhận mật khẩu mới không khớp");
+      return;
+    }
+
+    fetch('/api/auth/change-password', {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token') || ''}`
+      },
+      body: JSON.stringify({ currentPassword, newPassword })
+    })
+      .then(async res => {
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || "Lỗi đổi mật khẩu");
+        return data;
+      })
+      .then(() => {
+        setSecurityMessage("Đổi mật khẩu thành công!");
+        setCurrentPassword("");
+        setNewPassword("");
+        setConfirmPassword("");
+      })
+      .catch(err => {
+        setSecurityError(err.message);
+      });
   };
 
   return (
@@ -128,6 +214,7 @@ export function AccountPage({ wishlist, toggleWishlist, addToCart, currentUser }
             <button 
               onClick={() => {
                 localStorage.removeItem("user");
+                localStorage.removeItem("token");
                 window.location.href = "/";
               }}
               className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-left mt-4 transition-all hover:bg-red-500/10 cursor-pointer" 
@@ -146,25 +233,89 @@ export function AccountPage({ wishlist, toggleWishlist, addToCart, currentUser }
               <div className="rounded-2xl border p-6" style={{ background: "#1E293B", borderColor: "rgba(212,175,55,0.15)" }}>
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-lg font-semibold" style={{ color: "#F8FAFC" }}>Thông tin cá nhân</h2>
-                  <button className="flex items-center gap-1.5 text-sm font-medium" style={{ color: "#D4AF37" }}>
-                    <Edit2 className="w-3.5 h-3.5" /> Chỉnh sửa
-                  </button>
+                  {!isEditing ? (
+                    <button onClick={() => setIsEditing(true)} className="flex items-center gap-1.5 text-sm font-medium hover:text-yellow-400" style={{ color: "#D4AF37" }}>
+                      <Edit2 className="w-3.5 h-3.5" /> Chỉnh sửa
+                    </button>
+                  ) : (
+                    <button onClick={() => setIsEditing(false)} className="flex items-center gap-1.5 text-sm font-medium hover:text-slate-400" style={{ color: "#64748B" }}>
+                      Hủy bỏ
+                    </button>
+                  )}
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                  {[
-                    { label: "Tên", value: currentUser?.name ? currentUser.name.split(" ").pop() : "Hàng" },
-                    { label: "Họ", value: currentUser?.name ? currentUser.name.split(" ").slice(0, -1).join(" ") : "Khách" },
-                    { label: "Email", value: currentUser?.email || "" },
-                    { label: "Điện thoại", value: "+84 912 345 678" },
-                    { label: "Ngày sinh", value: "15 tháng 3, 1990" },
-                    { label: "Giới tính", value: "Nam" },
-                  ].map((f) => (
-                    <div key={f.label}>
-                      <div className="text-xs font-medium mb-1" style={{ color: "#64748B" }}>{f.label}</div>
-                      <div className="text-sm font-medium" style={{ color: "#F8FAFC" }}>{f.value}</div>
+
+                {profileError && <div className="mb-4 text-xs text-red-500">⚠ {profileError}</div>}
+                {profileMessage && <div className="mb-4 text-xs text-green-500">✓ {profileMessage}</div>}
+
+                {!isEditing ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    {[
+                      { label: "Họ và Tên", value: currentUser?.name || "Khách Hàng" },
+                      { label: "Email", value: currentUser?.email || "" },
+                      { label: "Điện thoại", value: currentUser?.phone || "+84 912 345 678" },
+                      { label: "Địa chỉ", value: currentUser?.address || "Chưa cập nhật" },
+                    ].map((f) => (
+                      <div key={f.label}>
+                        <div className="text-xs font-medium mb-1" style={{ color: "#64748B" }}>{f.label}</div>
+                        <div className="text-sm font-medium" style={{ color: "#F8FAFC" }}>{f.value}</div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <form onSubmit={handleUpdateProfile} className="space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-medium mb-1" style={{ color: "#94A3B8" }}>Họ và Tên</label>
+                        <input
+                          type="text"
+                          required
+                          value={profileForm.name}
+                          onChange={(e) => setProfileForm({ ...profileForm, name: e.target.value })}
+                          className="w-full px-4 py-2 rounded-xl border text-sm outline-none"
+                          style={{ background: "#0F172A", borderColor: "rgba(212,175,55,0.2)", color: "#F8FAFC" }}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium mb-1" style={{ color: "#94A3B8" }}>Email</label>
+                        <input
+                          type="email"
+                          required
+                          value={profileForm.email}
+                          onChange={(e) => setProfileForm({ ...profileForm, email: e.target.value })}
+                          className="w-full px-4 py-2 rounded-xl border text-sm outline-none"
+                          style={{ background: "#0F172A", borderColor: "rgba(212,175,55,0.2)", color: "#F8FAFC" }}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium mb-1" style={{ color: "#94A3B8" }}>Điện thoại</label>
+                        <input
+                          type="text"
+                          value={profileForm.phone}
+                          onChange={(e) => setProfileForm({ ...profileForm, phone: e.target.value })}
+                          className="w-full px-4 py-2 rounded-xl border text-sm outline-none"
+                          style={{ background: "#0F172A", borderColor: "rgba(212,175,55,0.2)", color: "#F8FAFC" }}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium mb-1" style={{ color: "#94A3B8" }}>Địa chỉ</label>
+                        <input
+                          type="text"
+                          value={profileForm.address}
+                          onChange={(e) => setProfileForm({ ...profileForm, address: e.target.value })}
+                          className="w-full px-4 py-2 rounded-xl border text-sm outline-none"
+                          style={{ background: "#0F172A", borderColor: "rgba(212,175,55,0.2)", color: "#F8FAFC" }}
+                        />
+                      </div>
                     </div>
-                  ))}
-                </div>
+                    <button
+                      type="submit"
+                      className="px-6 py-2 rounded-xl text-xs font-semibold mt-2"
+                      style={{ background: "linear-gradient(135deg, #D4AF37, #A88920)", color: "#0F172A" }}
+                    >
+                      Lưu thay đổi
+                    </button>
+                  </form>
+                )}
               </div>
 
               {/* Stats */}
@@ -380,17 +531,46 @@ export function AccountPage({ wishlist, toggleWishlist, addToCart, currentUser }
               <h2 className="text-lg font-semibold" style={{ color: "#F8FAFC" }}>Cài đặt tài khoản</h2>
               <div className="rounded-2xl border p-6" style={{ background: "#1E293B", borderColor: "rgba(212,175,55,0.15)" }}>
                 <h3 className="text-sm font-semibold mb-5" style={{ color: "#F8FAFC" }}>Đổi mật khẩu</h3>
-                <div className="space-y-4">
-                  {["Mật khẩu hiện tại", "Mật khẩu mới", "Xác nhận mật khẩu mới"].map((label) => (
-                    <div key={label}>
-                      <label className="block text-xs font-medium mb-1.5" style={{ color: "#94A3B8" }}>{label}</label>
-                      <input type="password" className="w-full px-4 py-2.5 rounded-xl border text-sm outline-none" style={{ background: "#0F172A", borderColor: "rgba(212,175,55,0.2)", color: "#F8FAFC" }} />
-                    </div>
-                  ))}
-                  <button className="px-6 py-2.5 rounded-xl text-sm font-semibold transition-all hover:opacity-90" style={{ background: "linear-gradient(135deg, #D4AF37, #A88920)", color: "#0F172A" }}>
+                {securityError && <div className="mb-4 text-xs text-red-500">⚠ {securityError}</div>}
+                {securityMessage && <div className="mb-4 text-xs text-green-500">✓ {securityMessage}</div>}
+                <form onSubmit={handleUpdatePassword} className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-medium mb-1.5" style={{ color: "#94A3B8" }}>Mật khẩu hiện tại</label>
+                    <input 
+                      type="password" 
+                      required
+                      value={currentPassword}
+                      onChange={e => setCurrentPassword(e.target.value)}
+                      className="w-full px-4 py-2.5 rounded-xl border text-sm outline-none" 
+                      style={{ background: "#0F172A", borderColor: "rgba(212,175,55,0.2)", color: "#F8FAFC" }} 
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium mb-1.5" style={{ color: "#94A3B8" }}>Mật khẩu mới</label>
+                    <input 
+                      type="password" 
+                      required
+                      value={newPassword}
+                      onChange={e => setNewPassword(e.target.value)}
+                      className="w-full px-4 py-2.5 rounded-xl border text-sm outline-none" 
+                      style={{ background: "#0F172A", borderColor: "rgba(212,175,55,0.2)", color: "#F8FAFC" }} 
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium mb-1.5" style={{ color: "#94A3B8" }}>Xác nhận mật khẩu mới</label>
+                    <input 
+                      type="password" 
+                      required
+                      value={confirmPassword}
+                      onChange={e => setConfirmPassword(e.target.value)}
+                      className="w-full px-4 py-2.5 rounded-xl border text-sm outline-none" 
+                      style={{ background: "#0F172A", borderColor: "rgba(212,175,55,0.2)", color: "#F8FAFC" }} 
+                    />
+                  </div>
+                  <button type="submit" className="px-6 py-2.5 rounded-xl text-sm font-semibold transition-all hover:opacity-90" style={{ background: "linear-gradient(135deg, #D4AF37, #A88920)", color: "#0F172A" }}>
                     Cập nhật mật khẩu
                   </button>
-                </div>
+                </form>
               </div>
 
               <div className="rounded-2xl border p-6" style={{ background: "#1E293B", borderColor: "rgba(212,175,55,0.15)" }}>

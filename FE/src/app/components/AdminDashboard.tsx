@@ -103,11 +103,12 @@ export function AdminDashboard() {
 
   const loadData = () => {
     setLoading(true);
+    const authHeaders = { 'Authorization': `Bearer ${localStorage.getItem('token') || ''}` };
     Promise.all([
-      fetch('/api/products').then(res => res.json()),
-      fetch('/api/orders').then(res => res.json()),
-      fetch('/api/customers').then(res => res.json()),
-      fetch('/api/analytics').then(res => res.json())
+      fetch('/api/products', { headers: authHeaders }).then(res => res.json()),
+      fetch('/api/orders', { headers: authHeaders }).then(res => res.json()),
+      fetch('/api/customers', { headers: authHeaders }).then(res => res.json()),
+      fetch('/api/analytics', { headers: authHeaders }).then(res => res.json())
     ])
       .then(([prods, ords, custs, analy]) => {
         setProducts(prods);
@@ -130,7 +131,10 @@ export function AdminDashboard() {
     e.preventDefault();
     fetch('/api/products', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token') || ''}`
+      },
       body: JSON.stringify(productForm)
     })
       .then(res => res.json())
@@ -147,7 +151,10 @@ export function AdminDashboard() {
     if (!selectedProduct) return;
     fetch(`/api/products/${selectedProduct.id}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token') || ''}`
+      },
       body: JSON.stringify(productForm)
     })
       .then(res => res.json())
@@ -163,7 +170,8 @@ export function AdminDashboard() {
   const handleDeleteProduct = () => {
     if (!selectedProduct) return;
     fetch(`/api/products/${selectedProduct.id}`, {
-      method: 'DELETE'
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${localStorage.getItem('token') || ''}` }
     })
       .then(() => {
         setShowDeleteModal(false);
@@ -176,7 +184,10 @@ export function AdminDashboard() {
   const handleUpdateOrderStatus = (orderId: string, newStatus: string) => {
     fetch(`/api/orders/${orderId}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token') || ''}`
+      },
       body: JSON.stringify({ status: newStatus })
     })
       .then(res => res.json())
@@ -228,9 +239,12 @@ export function AdminDashboard() {
     const qty = Number(stockQty);
     if (!stockQty.trim() || isNaN(qty) || qty <= 0) return;
 
-    fetch(`/api/products/${selectedProduct.id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+    fetch(`/api/products/${selectedProduct.id}/stock`, {
+      method: 'PATCH',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token') || ''}`
+      },
       body: JSON.stringify({ stock: selectedProduct.stock + qty })
     })
       .then(() => {

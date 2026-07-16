@@ -51,11 +51,12 @@ export function ProductDetailPage({ addToCart, wishlist, toggleWishlist }: Produ
         setLoading(false);
         
         // Fetch related products in the same category
-        fetch('/api/products')
+        fetch(`/api/products?category=${data.category}`)
           .then(res => res.json())
-          .then(allProds => {
-            const filtered = allProds
-              .filter((p: any) => p.category === data.category && p.id !== data.id)
+          .then(relatedData => {
+            const list = relatedData.products || relatedData;
+            const filtered = list
+              .filter((p: any) => p.id !== data.id)
               .slice(0, 4);
             setRelatedProducts(filtered);
           });

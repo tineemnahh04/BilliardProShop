@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router";
 import { Navbar } from "./components/Navbar";
 import { Footer } from "./components/Footer";
@@ -34,11 +34,20 @@ export default function App() {
       variant: "19oz / Z-3 Shaft",
     },
   ]);
-  const [wishlist, setWishlist] = useState<number[]>([2, 5]);
+  const [wishlist, setWishlist] = useState<number[]>([]);
   const [currentUser, setCurrentUser] = useState<any>(() => {
     const saved = localStorage.getItem("user");
     return saved ? JSON.parse(saved) : null;
   });
+
+  // Sync wishlist when user logs in or out
+  useEffect(() => {
+    if (currentUser && currentUser.wishlist) {
+      setWishlist(currentUser.wishlist);
+    } else {
+      setWishlist([]);
+    }
+  }, [currentUser]);
 
   const addToCart = (item: CartItem) => {
     setCartItems((prev) => {
@@ -61,7 +70,33 @@ export default function App() {
   const removeFromCart = (id: number) => setCartItems((prev) => prev.filter((i) => i.id !== id));
 
   const toggleWishlist = (id: number) => {
-    setWishlist((prev) => prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]);
+    if (!currentUser) {
+      alert("Vui lòng đăng nhập để sử dụng tính năng yêu thích!");
+      return;
+    }
+    fetch('/api/auth/wishlist', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token') || ''}`
+      },
+      body: JSON.stringify({ productId: id })
+    })
+      .then(res => {
+        if (!res.ok) throw new Error("Lỗi cập nhật wishlist");
+        return res.json();
+      })
+      .then(data => {
+        if (data.wishlist) {
+          setWishlist(data.wishlist);
+          const updatedUser = { ...currentUser, wishlist: data.wishlist };
+          localStorage.setItem("user", JSON.stringify(updatedUser));
+          setCurrentUser(updatedUser);
+        }
+      })
+      .catch(err => {
+        console.error("Lỗi cập nhật wishlist:", err);
+      });
   };
 
   const handleLoginSuccess = (user: any) => {
