@@ -1,6 +1,6 @@
 # Billiard Pro Shop UI/UX Design
 
-This is a code bundle for Billiard Pro Shop UI/UX Design. The original project is available at https://www.figma.com/design/RITXgZkUiJJZxvJaaG5s3E/Billiard-Pro-Shop-UI-UX-Design.
+This is a code bundle for Billiard Pro Shop UI/UX Design. The original project is available at https://flower-bottom-41403298.figma.site/.
 
 ## Structure
 
