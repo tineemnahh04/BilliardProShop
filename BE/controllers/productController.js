@@ -220,5 +220,58 @@ export const productController = {
     } catch (error) {
       res.status(500).json({ message: 'Lỗi khi cập nhật tồn kho nhanh', error: error.message });
     }
+  },
+
+  // Thêm đánh giá mới (reviewsList & recalculate rating)
+  addReview: async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { rating, text } = req.body;
+
+      if (isNaN(id)) {
+        return res.status(400).json({ message: 'ID sản phẩm không hợp lệ' });
+      }
+
+      if (!rating || !text) {
+        return res.status(400).json({ message: 'Số sao và nội dung đánh giá là bắt buộc' });
+      }
+
+      const ratingNum = parseFloat(rating);
+      if (isNaN(ratingNum) || ratingNum < 1 || ratingNum > 5) {
+        return res.status(400).json({ message: 'Số sao phải từ 1 đến 5' });
+      }
+
+      const product = await Product.findOne({ id });
+      if (!product) {
+        return res.status(404).json({ message: 'Sản phẩm không tồn tại' });
+      }
+
+      // Thêm vào reviewsList
+      const newReview = {
+        name: req.user.name,
+        rating: ratingNum,
+        date: new Date().toLocaleDateString('vi-VN'),
+        text,
+        verified: true
+      };
+
+      if (!product.reviewsList) {
+        product.reviewsList = [];
+      }
+      product.reviewsList.push(newReview);
+
+      // Tính lại rating trung bình và tổng số đánh giá
+      const totalStars = product.reviewsList.reduce((sum, r) => sum + r.rating, 0);
+      product.rating = parseFloat((totalStars / product.reviewsList.length).toFixed(1));
+      product.reviews = product.reviewsList.length;
+
+      await product.save();
+      res.status(201).json({
+        message: 'Đăng đánh giá thành công!',
+        product
+      });
+    } catch (error) {
+      res.status(500).json({ message: 'Lỗi khi đăng đánh giá', error: error.message });
+    }
   }
 };

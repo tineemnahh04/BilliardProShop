@@ -47,6 +47,14 @@ export function CheckoutPage({ cartItems, clearCart, currentUser }: CheckoutPage
   const [completed, setCompleted] = useState(false);
   const [createdOrder, setCreatedOrder] = useState<any>(null);
   const [loading, setLoading] = useState(false);
+  const [availableCoupons, setAvailableCoupons] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetch('/api/coupons')
+      .then(res => res.json())
+      .then(data => setAvailableCoupons(data))
+      .catch(err => console.error("Lỗi tải coupons:", err));
+  }, []);
 
   const subtotal = cartItems.reduce((s, i) => s + i.price * i.quantity, 0);
   const discount = discountType === "percentage" ? subtotal * (discountValue / 100) : discountValue;
@@ -443,6 +451,67 @@ export function CheckoutPage({ cartItems, clearCart, currentUser }: CheckoutPage
               <p className="text-xs text-green-500 mb-3">
                 ✓ Đã áp dụng mã giảm giá {appliedCoupon} (-{discountType === 'percentage' ? `${discountValue}%` : `$${discountValue}`})!
               </p>
+            )}
+
+            {/* Gợi ý coupon trong checkout */}
+            {availableCoupons.length > 0 && (
+              <div className="mb-4">
+                <div className="text-[10px] font-semibold uppercase tracking-wider mb-2" style={{ color: "#94A3B8" }}>
+                  🎁 Mã ưu đãi có sẵn (Bấm để áp dụng nhanh)
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  {availableCoupons.map((c) => (
+                    <button
+                      type="button"
+                      key={c.code}
+                      onClick={() => {
+                        setCouponCode(c.code);
+                        setCouponError("");
+                        fetch('/api/coupons/validate', {
+                          method: 'POST',
+                          headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${localStorage.getItem("token") || ""}`
+                          },
+                          body: JSON.stringify({ code: c.code, subtotal })
+                        })
+                          .then(res => res.json())
+                          .then(data => {
+                            if (data.isValid) {
+                              setAppliedCoupon(data.code);
+                              setDiscountValue(data.discount);
+                              setDiscountType(data.type);
+                              setCouponError("");
+                            } else {
+                              setCouponError(data.message || "Mã không hợp lệ");
+                              setAppliedCoupon("");
+                              setDiscountValue(0);
+                            }
+                          })
+                          .catch(err => {
+                            console.error(err);
+                            setCouponError("Lỗi kết nối");
+                          });
+                      }}
+                      className="text-left p-2 rounded-lg border text-[10px] transition-all hover:bg-slate-800/40 flex items-center justify-between"
+                      style={{ 
+                        borderColor: appliedCoupon === c.code ? "#D4AF37" : "rgba(212,175,55,0.1)",
+                        background: appliedCoupon === c.code ? "rgba(212,175,55,0.05)" : "#0F172A"
+                      }}
+                    >
+                      <div>
+                        <span className="font-mono font-bold" style={{ color: "#D4AF37" }}>{c.code}</span>
+                        <span className="ml-2" style={{ color: "#94A3B8" }}>
+                          {c.type === 'percentage' ? `Giảm ${c.discount}%` : `Giảm $${c.discount}`} (Đơn tối thiểu ${c.minSpend})
+                        </span>
+                      </div>
+                      <span style={{ color: appliedCoupon === c.code ? "#22C55E" : "#94A3B8" }}>
+                        {appliedCoupon === c.code ? "✓ Đang áp dụng" : "Áp dụng"}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
             )}
 
             <div className="pt-4 border-t space-y-2" style={{ borderColor: "rgba(212,175,55,0.1)" }}>

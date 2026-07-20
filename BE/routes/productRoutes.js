@@ -13,4 +13,7 @@ router.put('/:id', protect, adminCheck, productController.update);
 router.delete('/:id', protect, adminCheck, productController.delete);
 router.patch('/:id/stock', protect, adminCheck, productController.updateStock);
 
+// User reviews routes
+router.post('/:id/reviews', protect, productController.addReview);
+
 export default router;
