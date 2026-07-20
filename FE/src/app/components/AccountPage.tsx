@@ -511,7 +511,7 @@ export function AccountPage({ wishlist, toggleWishlist, addToCart, currentUser }
                           <button 
                             onClick={() => item.inStock && addToCart({ id: item.id, name: item.name, brand: item.brand, price: item.price, image: item.image, quantity: 1 })}
                             disabled={!item.inStock}
-                            className="px-3 py-1.5 rounded-lg text-xs font-semibold disabled:opacity-40" 
+                            className="px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all duration-300 cursor-pointer hover:scale-105 hover:shadow-[0_0_15px_rgba(212,175,55,0.4)] active:scale-95 disabled:opacity-40 disabled:pointer-events-none disabled:transform-none" 
                             style={{ background: "linear-gradient(135deg, #D4AF37, #A88920)", color: "#0F172A" }}
                           >
                             {item.inStock ? "Thêm giỏ hàng" : "Hết hàng"}

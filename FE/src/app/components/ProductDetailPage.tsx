@@ -311,7 +311,7 @@ export function ProductDetailPage({ addToCart, wishlist, toggleWishlist }: Produ
               <button
                 onClick={handleAddToCart}
                 disabled={!product.inStock}
-                className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-sm transition-all hover:opacity-90 disabled:opacity-40"
+                className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm transition-all duration-300 cursor-pointer hover:scale-[1.02] hover:shadow-[0_0_20px_rgba(212,175,55,0.4)] active:scale-95 disabled:opacity-40 disabled:pointer-events-none disabled:transform-none"
                 style={{ background: addedToCart ? "linear-gradient(135deg, #22C55E, #16A34A)" : "linear-gradient(135deg, #D4AF37, #A88920)", color: addedToCart ? "#fff" : "#0F172A" }}
               >
                 {addedToCart ? <><Check className="w-4 h-4" /> Đã thêm!</> : <><ShoppingCart className="w-4 h-4" /> Thêm vào giỏ</>}
@@ -319,7 +319,7 @@ export function ProductDetailPage({ addToCart, wishlist, toggleWishlist }: Produ
 
               <button
                 onClick={() => toggleWishlist(product.id)}
-                className="w-11 h-11 rounded-xl flex items-center justify-center border transition-all hover:border-yellow-400/50"
+                className="w-11 h-11 rounded-xl flex items-center justify-center border transition-all duration-300 cursor-pointer hover:scale-105 hover:border-yellow-400/50 hover:shadow-[0_0_15px_rgba(212,175,55,0.3)] active:scale-95"
                 style={{
                   background: isWished ? "rgba(212,175,55,0.15)" : "#1E293B",
                   borderColor: isWished ? "#D4AF37" : "rgba(212,175,55,0.2)",
@@ -332,7 +332,7 @@ export function ProductDetailPage({ addToCart, wishlist, toggleWishlist }: Produ
 
             <Link
               to="/checkout"
-              className="flex items-center justify-center gap-2 w-full py-3 rounded-xl font-semibold text-sm border transition-all hover:bg-emerald-400/10 mb-6"
+              className="flex items-center justify-center gap-2 w-full py-3 rounded-xl font-bold text-sm border transition-all duration-300 cursor-pointer hover:bg-emerald-500/15 hover:shadow-[0_0_20px_rgba(34,197,94,0.3)] hover:scale-[1.01] active:scale-95 mb-6"
               style={{ borderColor: "#22C55E", color: "#22C55E" }}
               onClick={() => addToCart({ id: product.id, name: product.name, brand: product.brand, price: product.price, image: product.images?.[0] || product.image, quantity: qty, variant: [selectedWeight, selectedShaft].filter(Boolean).join(" / ") })}
             >

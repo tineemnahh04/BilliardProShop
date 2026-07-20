@@ -110,8 +110,8 @@ export function SellCueModal({ isOpen, onClose, onSuccess, currentUser }: SellCu
               <Tag className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-white">Sell Your Cue</h3>
-              <p className="text-xs text-slate-400">Đăng bài bán hoặc trao đổi cơ bida lên Marketplace</p>
+              <h3 className="text-lg font-bold text-white">Đăng Bán / Trao Đổi Cơ Bida</h3>
+              <p className="text-xs text-slate-400">Đăng bài bán hoặc trao đổi cơ bida lên Chợ Bida Trao Đổi</p>
             </div>
           </div>
           <button

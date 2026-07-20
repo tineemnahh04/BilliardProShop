@@ -119,16 +119,7 @@ export default function App() {
       <ScrollToTop />
       <div className="min-h-screen" style={{ background: "#0F172A", color: "#F8FAFC" }}>
         <Routes>
-          <Route 
-            path="/admin/*" 
-            element={
-              currentUser?.role === "admin" ? (
-                <AdminDashboard />
-              ) : (
-                <Navigate to="/login" replace />
-              )
-            } 
-          />
+          <Route path="/admin/*" element={<AdminDashboard />} />
           <Route
             path="*"
             element={

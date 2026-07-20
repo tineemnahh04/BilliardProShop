@@ -2,9 +2,9 @@
 
 :root {
   --font-size: 16px;
-  --font-family-display: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
-  --font-family-heading: 'Plus Jakarta Sans', system-ui, sans-serif;
-  --font-family-body: 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-family-display: 'Inter', 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-family-heading: 'Inter', 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-family-body: 'Inter', 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-family-mono: 'JetBrains Mono', monospace;
 
   /* Billiard Pro Shop dark luxury theme */
@@ -132,6 +132,13 @@
 }
 
 @layer base {
+  html {
+    font-size: var(--font-size);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
   * {
     @apply border-border outline-ring/50;
   }
@@ -139,6 +146,8 @@
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-family-body);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -200,6 +209,7 @@
     font-size: var(--text-base);
     font-weight: var(--font-weight-medium);
     line-height: 1.5;
+    cursor: pointer;
   }
 
   input {

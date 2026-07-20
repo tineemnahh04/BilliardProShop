@@ -105,7 +105,7 @@ export function AICueFinderPage({ addToCart }: AICueFinderPageProps) {
           Tính năng AI Tư Vấn Độc Quyền
         </div>
         <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white font-display">
-          AI Cue Finder <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-amber-200">Personalized</span>
+          Tư Vấn Chọn Cơ AI <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-amber-200">Cá Nhân Hóa</span>
         </h1>
         <p className="mt-3 text-slate-400 text-sm sm:text-base max-w-2xl mx-auto">
           Không còn mất thời gian đắn đo! AI sẽ phân tích chiều cao, lực tay, phong cách đánh và ngân sách để tư vấn cây cơ hoàn hảo dành riêng cho bạn.
@@ -565,7 +565,7 @@ export function AICueFinderPage({ addToCart }: AICueFinderPageProps) {
                       image: result.recommendedCue.image,
                       quantity: 1
                     })}
-                    className="flex-1 min-w-[160px] flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 font-bold text-sm hover:brightness-110 transition-all cursor-pointer shadow-lg shadow-yellow-500/10"
+                    className="flex-1 min-w-[160px] flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 font-bold text-sm hover:brightness-110 hover:scale-105 hover:shadow-[0_0_20px_rgba(212,175,55,0.4)] active:scale-95 transition-all duration-300 cursor-pointer shadow-lg shadow-yellow-500/10"
                   >
                     <ShoppingCart className="w-4 h-4" /> Thêm Vào Giỏ hàng
                   </button>
@@ -592,7 +592,7 @@ export function AICueFinderPage({ addToCart }: AICueFinderPageProps) {
             {result.runnerUps && result.runnerUps.length > 0 && (
               <div className="pt-6 space-y-4">
                 <h4 className="text-sm font-bold text-slate-300 uppercase tracking-wider">
-                  Các lựa chọn phù hợp tiếp theo (Runner-ups)
+                  Các lựa chọn phù hợp tiếp theo (Gợi ý thêm)
                 </h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {result.runnerUps.map((cue) => (

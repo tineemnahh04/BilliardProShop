@@ -383,7 +383,7 @@ export function ProductListingPage({ addToCart, wishlist, toggleWishlist }: Prod
                         <button
                           onClick={() => p.inStock && addToCart({ id: p.id, name: p.name, brand: p.brand, price: p.price, image: p.image, quantity: 1 })}
                           disabled={!p.inStock}
-                          className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:opacity-90 disabled:opacity-40"
+                          className="px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all duration-300 cursor-pointer hover:scale-105 hover:shadow-[0_0_15px_rgba(212,175,55,0.4)] active:scale-95 disabled:opacity-40 disabled:pointer-events-none disabled:transform-none"
                           style={{ background: "linear-gradient(135deg, #D4AF37, #A88920)", color: "#0F172A" }}
                         >
                           {p.inStock ? "Thêm giỏ hàng" : "Hết hàng"}
@@ -412,7 +412,7 @@ export function ProductListingPage({ addToCart, wishlist, toggleWishlist }: Prod
                     <button
                       onClick={() => p.inStock && addToCart({ id: p.id, name: p.name, brand: p.brand, price: p.price, image: p.image, quantity: 1 })}
                       disabled={!p.inStock}
-                      className="self-center px-5 py-2.5 rounded-xl text-sm font-semibold transition-all hover:opacity-90 disabled:opacity-40 shrink-0"
+                      className="self-center px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 cursor-pointer hover:scale-105 hover:shadow-[0_0_18px_rgba(212,175,55,0.4)] active:scale-95 disabled:opacity-40 disabled:pointer-events-none disabled:transform-none shrink-0"
                       style={{ background: "linear-gradient(135deg, #D4AF37, #A88920)", color: "#0F172A" }}
                     >
                       {p.inStock ? "Thêm giỏ hàng" : "Hết hàng"}

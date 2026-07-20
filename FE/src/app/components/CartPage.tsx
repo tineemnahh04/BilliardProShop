@@ -140,7 +140,7 @@ export function CartPage({ cartItems, updateQty, removeFromCart }: CartPageProps
                       <span className="text-sm font-bold" style={{ color: "#D4AF37" }}>${s.price}</span>
                       <button 
                         onClick={() => addToCart({ id: s.id, name: s.name, brand: s.brand, price: s.price, image: s.image, quantity: 1 })}
-                        className="text-xs px-2 py-0.5 rounded-lg font-medium transition-all" 
+                        className="text-xs px-2.5 py-1 rounded-lg font-bold transition-all duration-300 cursor-pointer hover:bg-yellow-400 hover:text-slate-950 hover:scale-105 hover:shadow-[0_0_10px_rgba(212,175,55,0.4)] active:scale-95" 
                         style={{ background: "rgba(212,175,55,0.15)", color: "#D4AF37" }}
                       >
                         + Thêm

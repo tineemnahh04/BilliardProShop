@@ -179,7 +179,7 @@ export function MarketplacePage({ currentUser }: MarketplacePageProps) {
       {loading && (
         <div className="py-20 text-center space-y-4">
           <div className="w-12 h-12 border-4 border-yellow-500/20 border-t-yellow-400 rounded-full animate-spin mx-auto" />
-          <p className="text-sm text-slate-400 font-medium">Đang tải bài đăng Marketplace...</p>
+          <p className="text-sm text-slate-400 font-medium">Đang tải bài đăng Chợ Bida Trao Đổi...</p>
         </div>
       )}
 
@@ -199,7 +199,7 @@ export function MarketplacePage({ currentUser }: MarketplacePageProps) {
         <div className="py-20 text-center bg-slate-900/60 border border-slate-800 rounded-2xl space-y-4">
           <Tag className="w-12 h-12 text-slate-600 mx-auto" />
           <h3 className="text-lg font-bold text-white">Chưa có bài đăng mua bán nào</h3>
-          <p className="text-xs text-slate-400 max-w-sm mx-auto">Hãy là người đầu tiên đăng cây cơ của bạn lên Marketplace!</p>
+          <p className="text-xs text-slate-400 max-w-sm mx-auto">Hãy là người đầu tiên đăng cây cơ của bạn lên Chợ Bida Trao Đổi!</p>
           <button
             onClick={() => setIsSellModalOpen(true)}
             className="px-5 py-2.5 bg-yellow-400 text-slate-950 font-bold text-xs rounded-xl hover:bg-yellow-300 transition-colors"
