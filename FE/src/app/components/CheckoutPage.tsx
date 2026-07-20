@@ -50,8 +50,9 @@ export function CheckoutPage({ cartItems, clearCart, currentUser }: CheckoutPage
 
   const subtotal = cartItems.reduce((s, i) => s + i.price * i.quantity, 0);
   const discount = discountType === "percentage" ? subtotal * (discountValue / 100) : discountValue;
-  const shipping = subtotal >= 150 ? 0 : 12.99;
-  const total = subtotal - discount + shipping;
+  const hasBlindBoxReward = cartItems.some(i => i.price === 0 || (i.name && i.name.includes("Túi Mù")));
+  const shipping = (subtotal >= 150 || hasBlindBoxReward) ? 0 : 12.99;
+  const total = Math.max(0, subtotal - discount + shipping);
 
   const updateForm = (key: string, value: string) => setForm((f) => ({ ...f, [key]: value }));
 
@@ -86,12 +87,17 @@ export function CheckoutPage({ cartItems, clearCart, currentUser }: CheckoutPage
 
   const handlePlaceOrder = () => {
     setLoading(true);
+    const blindBoxPmLabel = localStorage.getItem("blindBoxPaymentLabel") || "Ví điện tử MoMo";
+    const paymentString = (hasBlindBoxReward && subtotal === 0)
+      ? `Đã thanh toán $500 qua ${blindBoxPmLabel}`
+      : (paymentMethod === 'vnpay' ? 'VNPAY' : paymentMethod === 'momo' ? 'MoMo' : 'COD');
+
     const orderData = {
       customerName: `${form.firstName} ${form.lastName}`.trim(),
       customerEmail: form.email,
       phone: form.phone,
       address: `${form.address}, ${form.city}, ${form.state} ${form.zip}, ${form.country}`,
-      payment: paymentMethod === 'vnpay' ? 'VNPAY' : paymentMethod === 'momo' ? 'MoMo' : 'COD',
+      payment: paymentString,
       items: cartItems.map(item => ({
         id: item.id,
         name: item.name,
@@ -280,11 +286,11 @@ export function CheckoutPage({ cartItems, clearCart, currentUser }: CheckoutPage
                 </div>
               </div>
               <button
-                onClick={() => setStep(1)}
+                onClick={() => setStep(hasBlindBoxReward && subtotal === 0 ? 2 : 1)}
                 className="mt-6 w-full py-3.5 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-all hover:opacity-90"
                 style={{ background: "linear-gradient(135deg, #D4AF37, #A88920)", color: "#0F172A" }}
               >
-                Tiếp tục đến thanh toán <ChevronRight className="w-4 h-4" />
+                {hasBlindBoxReward && subtotal === 0 ? "Tiếp tục xác nhận nhận hàng ($0.00)" : "Tiếp tục đến thanh toán"} <ChevronRight className="w-4 h-4" />
               </button>
             </div>
           )}
@@ -367,10 +373,20 @@ export function CheckoutPage({ cartItems, clearCart, currentUser }: CheckoutPage
                 <div className="text-sm" style={{ color: "#94A3B8" }}>{form.email} · {form.phone}</div>
               </div>
 
-              <div className="rounded-xl p-4 mb-6" style={{ background: "#0F172A" }}>
-                <div className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: "#94A3B8" }}>Phương thức thanh toán</div>
-                <div className="text-sm" style={{ color: "#F8FAFC" }}>
-                  {paymentMethod === "vnpay" ? "Thẻ tín dụng VNPAY" : paymentMethod === "momo" ? "Ví điện tử MoMo" : "Thanh toán tiền mặt khi nhận hàng (COD)"}
+              <div className="rounded-xl p-4 mb-6" style={{ background: "#0F172A", border: "1px solid rgba(212,175,55,0.3)" }}>
+                <div className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: "#94A3B8" }}>Phương thức thanh toán</div>
+                <div className="text-sm font-bold flex items-center gap-2" style={{ color: hasBlindBoxReward ? "#D4AF37" : "#F8FAFC" }}>
+                  {hasBlindBoxReward && subtotal === 0 ? (
+                    <>
+                      <Check className="w-4 h-4 text-emerald-400" />
+                      <span>
+                        {cartItems.find(i => i.variant && i.variant.includes("Đã thanh toán"))?.variant || 
+                         `Đã thanh toán $500 qua ${localStorage.getItem("blindBoxPaymentLabel") || "Ví điện tử MoMo"} (Túi Mù)`}
+                      </span>
+                    </>
+                  ) : (
+                    paymentMethod === "vnpay" ? "Thẻ tín dụng VNPAY" : paymentMethod === "momo" ? "Ví điện tử MoMo" : "Thanh toán tiền mặt khi nhận hàng (COD)"
+                  )}
                 </div>
               </div>
 
@@ -385,7 +401,7 @@ export function CheckoutPage({ cartItems, clearCart, currentUser }: CheckoutPage
               </div>
 
               <div className="flex gap-3">
-                <button onClick={() => setStep(1)} className="px-6 py-3 rounded-xl text-sm font-medium border transition-all hover:bg-white/5" style={{ borderColor: "rgba(212,175,55,0.2)", color: "#94A3B8" }}>
+                <button onClick={() => setStep(hasBlindBoxReward && subtotal === 0 ? 0 : 1)} className="px-6 py-3 rounded-xl text-sm font-medium border transition-all hover:bg-white/5" style={{ borderColor: "rgba(212,175,55,0.2)", color: "#94A3B8" }}>
                   Quay lại
                 </button>
                 <button
@@ -394,7 +410,7 @@ export function CheckoutPage({ cartItems, clearCart, currentUser }: CheckoutPage
                   className="flex-1 py-3 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-all hover:opacity-90 disabled:opacity-50"
                   style={{ background: "linear-gradient(135deg, #22C55E, #16A34A)", color: "#fff" }}
                 >
-                  <Shield className="w-4 h-4" /> {loading ? "Đang xử lý..." : `Đặt Hàng Ngay — $${total.toFixed(2)}`}
+                  <Shield className="w-4 h-4" /> {loading ? "Đang xử lý..." : total === 0 ? "Xác Nhận Nhận Phần Thưởng ($0.00 - Freeship)" : `Đặt Hàng Ngay — $${total.toFixed(2)}`}
                 </button>
               </div>
             </div>
@@ -414,9 +430,11 @@ export function CheckoutPage({ cartItems, clearCart, currentUser }: CheckoutPage
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="text-xs font-medium truncate" style={{ color: "#F8FAFC" }}>{item.name}</div>
-                    {item.variant && <div className="text-xs" style={{ color: "#64748B" }}>{item.variant}</div>}
+                    {item.variant && <div className="text-xs text-yellow-400 font-semibold">{item.variant}</div>}
                   </div>
-                  <span className="text-sm font-semibold shrink-0" style={{ color: "#D4AF37" }}>${(item.price * item.quantity).toFixed(2)}</span>
+                  <span className="text-sm font-semibold shrink-0" style={{ color: item.price === 0 ? "#22C55E" : "#D4AF37" }}>
+                    {item.price === 0 ? "MIỄN PHÍ ($0.00)" : `$${(item.price * item.quantity).toFixed(2)}`}
+                  </span>
                 </div>
               ))}
             </div>

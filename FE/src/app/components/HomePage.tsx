@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router";
 import {
   ArrowRight, Star, Shield, Truck, RotateCcw, Award,
-  ChevronLeft, ChevronRight, Quote, Target, Zap, Package, BookOpen, Hand, Circle, Sparkles
+  ChevronLeft, ChevronRight, Quote, Target, Zap, Package, BookOpen, Hand, Circle, Sparkles, Gift, Flame, Trophy
 } from "lucide-react";
 import type { CartItem } from "../App";
 
@@ -374,6 +374,71 @@ export function HomePage({ addToCart, wishlist, toggleWishlist }: HomePageProps)
         </div>
       </section>
 
+      {/* 🎁 ULTRA-PROMINENT BLIND BOX SECTION ($500 -> 10% $1,000 DROP) */}
+      <section className="max-w-[1440px] mx-auto px-6 pt-12">
+        <div 
+          className="rounded-3xl p-8 md:p-12 relative overflow-hidden border-2 border-yellow-500/60 flex flex-col lg:flex-row items-center justify-between gap-10 shadow-[0_0_50px_rgba(212,175,55,0.25)]"
+          style={{
+            background: "radial-gradient(circle at 80% 20%, rgba(212,175,55,0.15) 0%, rgba(15,23,42,0.95) 70%)",
+          }}
+        >
+          {/* Ambient Lighting & Particles */}
+          <div className="absolute -left-20 -bottom-20 w-96 h-96 rounded-full bg-yellow-500/10 blur-3xl pointer-events-none" />
+          <div className="absolute top-4 right-4 px-4 py-1.5 rounded-full bg-gradient-to-r from-yellow-400 via-amber-300 to-yellow-500 text-slate-950 font-black text-xs uppercase tracking-widest animate-pulse shadow-lg">
+            🔥 SỰ KIỆN NỔ HŨ HOT NHẤT 2026
+          </div>
+
+          <div className="space-y-5 max-w-2xl relative z-10 text-center lg:text-left">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-yellow-500/40 bg-yellow-500/10 text-yellow-400 text-xs font-extrabold uppercase tracking-wider">
+              <Flame className="w-4 h-4 animate-bounce text-yellow-400" /> TÍNH NĂNG TÚI MÙ ĐỘC QUYỀN
+            </div>
+            
+            <h2 className="text-3xl md:text-5xl font-black text-white leading-tight font-display">
+              Mở Túi Mù Bida <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-amber-300 to-yellow-500">$500</span> — Cơ Hội Trúng Gậy <span className="text-yellow-400 underline decoration-yellow-400/50 underline-offset-8">$1,000</span>
+            </h2>
+
+            <p className="text-slate-300 text-sm md:text-base leading-relaxed font-light">
+              Mỗi lượt mở Túi Mù <strong className="text-yellow-400">$500 (12.500.000đ)</strong> chắc chắn nhận ngay 1 Cây Cơ Cao Cấp Chính Hãng (trị giá $500 - $650). 
+              Đặc biệt <strong className="text-amber-300 font-bold">CƠ HỘI NỔ HŨ 10%</strong> nhận Siêu Phẩm Cây Cơ Predator/Mezz Dragon Edition trị giá <strong className="text-yellow-400 font-extrabold">$1,000 (25.000.000đ)</strong>!
+            </p>
+
+            <div className="pt-2 flex flex-wrap items-center justify-center lg:justify-start gap-4">
+              <Link
+                to="/blind-box"
+                className="inline-flex items-center gap-3 px-8 py-4 rounded-2xl font-black text-base transition-all duration-300 hover:brightness-110 hover:scale-105 active:scale-95 shadow-[0_0_30px_rgba(212,175,55,0.4)]"
+                style={{ background: "linear-gradient(135deg, #FACC15, #D4AF37)", color: "#0F172A" }}
+              >
+                <Gift className="w-6 h-6 text-slate-950 animate-bounce" /> 🎁 Mua & Mở Túi Mù Ngay ($500)
+              </Link>
+              
+              <div className="flex items-center gap-2 text-xs text-slate-400">
+                <Shield className="w-4 h-4 text-emerald-400" />
+                <span>Minh bạch 100% tỷ lệ quay thưởng · Nhận hàng tức thì</span>
+              </div>
+            </div>
+          </div>
+
+          {/* 3D Animated Box Card Showcase */}
+          <div className="relative z-10 shrink-0 cursor-pointer" onClick={() => window.location.href = '/blind-box'}>
+            <div className="relative group">
+              <div className="absolute -inset-4 bg-gradient-to-r from-yellow-400 via-amber-300 to-yellow-500 rounded-3xl blur-2xl opacity-50 group-hover:opacity-100 transition duration-500 animate-pulse" />
+              
+              <div className="relative w-64 h-64 sm:w-72 sm:h-72 rounded-3xl bg-slate-900 border-2 border-yellow-400/80 p-6 flex flex-col items-center justify-center text-center shadow-2xl transition-all duration-300 group-hover:scale-105">
+                <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-yellow-400 to-amber-600 flex items-center justify-center shadow-lg shadow-yellow-500/40 mb-3 animate-bounce">
+                  <Gift className="w-14 h-14 text-slate-950" />
+                </div>
+                
+                <span className="text-[10px] font-extrabold uppercase px-3 py-0.5 rounded-full bg-yellow-400/20 text-yellow-300 border border-yellow-400/40 mb-1">
+                  10% NỔ HŨ $1,000
+                </span>
+                <div className="text-lg font-bold text-white">Túi Mù Bida Hoàng Gia</div>
+                <div className="text-2xl font-black text-yellow-400 font-mono">$500.00</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Categories */}
       <section className="max-w-[1440px] mx-auto px-6 py-20">
         <div className="flex items-end justify-between mb-10">
@@ -574,6 +639,17 @@ export function HomePage({ addToCart, wishlist, toggleWishlist }: HomePageProps)
           ))}
         </div>
       </section>
+
+      {/* Floating Quick Action Widget for Blind Box */}
+      <div className="fixed bottom-6 right-6 z-50 animate-bounce">
+        <Link
+          to="/blind-box"
+          className="flex items-center gap-3 px-5 py-3 rounded-full bg-gradient-to-r from-yellow-400 via-amber-500 to-yellow-400 text-slate-950 font-black text-xs sm:text-sm shadow-[0_0_25px_rgba(212,175,55,0.5)] hover:scale-105 active:scale-95 transition-all duration-300 border-2 border-yellow-300"
+        >
+          <Gift className="w-5 h-5 text-slate-950" />
+          <span>🎁 Mở Túi Mù $500 (Nổ Hũ $1,000)</span>
+        </Link>
+      </div>
     </div>
   );
 }

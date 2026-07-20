@@ -24,8 +24,9 @@ export function CartPage({ cartItems, updateQty, removeFromCart }: CartPageProps
 
   const subtotal = cartItems.reduce((sum, i) => sum + i.price * i.quantity, 0);
   const discount = discountType === "percentage" ? subtotal * (discountValue / 100) : discountValue;
-  const shipping = subtotal >= 150 ? 0 : 12.99;
-  const total = subtotal - discount + shipping;
+  const hasBlindBoxReward = cartItems.some(i => i.price === 0 || (i.name && i.name.includes("Túi Mù")));
+  const shipping = (subtotal >= 150 || hasBlindBoxReward) ? 0 : 12.99;
+  const total = Math.max(0, subtotal - discount + shipping);
 
   const applyCoupon = () => {
     setCouponError("");
