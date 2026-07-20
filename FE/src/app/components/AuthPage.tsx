@@ -230,9 +230,31 @@ export function AuthPage({ onLoginSuccess }: AuthPageProps) {
               className="text-left p-3 rounded-xl border transition-all hover:bg-slate-800/40 text-xs text-slate-300"
               style={{ borderColor: "rgba(212,175,55,0.08)", background: "#182232" }}
             >
-              <div className="font-bold" style={{ color: "#22C55E" }}>Mẫu Khách Hàng (Customer)</div>
-              <div className="mt-1 font-mono">Email: customer@email.com</div>
-              <div className="font-mono">Pass: customer123</div>
+              <div className="font-bold text-emerald-400">Marcus Chen (Buyer)</div>
+              <div className="mt-1 font-mono text-[11px]">Email: customer@email.com</div>
+              <div className="font-mono text-[11px]">Pass: customer123</div>
+            </button>
+
+            {/* Seller account */}
+            <button
+              onClick={() => handleTestAccount("hung.mezz@email.com", "seller123")}
+              className="text-left p-3 rounded-xl border transition-all hover:bg-slate-800/40 text-xs text-slate-300"
+              style={{ borderColor: "rgba(212,175,55,0.08)", background: "#182232" }}
+            >
+              <div className="font-bold text-yellow-400">Nguyễn Văn Hùng (Seller Mezz)</div>
+              <div className="mt-1 font-mono text-[11px]">Email: hung.mezz@email.com</div>
+              <div className="font-mono text-[11px]">Pass: seller123</div>
+            </button>
+
+            {/* Bidder account */}
+            <button
+              onClick={() => handleTestAccount("tuan.le@email.com", "bidder123")}
+              className="text-left p-3 rounded-xl border transition-all hover:bg-slate-800/40 text-xs text-slate-300"
+              style={{ borderColor: "rgba(212,175,55,0.08)", background: "#182232" }}
+            >
+              <div className="font-bold text-blue-400">Lê Minh Tuấn (Bidder 7.0M)</div>
+              <div className="mt-1 font-mono text-[11px]">Email: tuan.le@email.com</div>
+              <div className="font-mono text-[11px]">Pass: bidder123</div>
             </button>
 
             {/* Admin account */}
@@ -241,9 +263,9 @@ export function AuthPage({ onLoginSuccess }: AuthPageProps) {
               className="text-left p-3 rounded-xl border transition-all hover:bg-slate-800/40 text-xs text-slate-300"
               style={{ borderColor: "rgba(212,175,55,0.08)", background: "#182232" }}
             >
-              <div className="font-bold" style={{ color: "#D4AF37" }}>Mẫu Quản Trị (Admin)</div>
-              <div className="mt-1 font-mono">Email: admin@email.com</div>
-              <div className="font-mono">Pass: admin123</div>
+              <div className="font-bold text-amber-400">Admin Pro (Quản Trị)</div>
+              <div className="mt-1 font-mono text-[11px]">Email: admin@email.com</div>
+              <div className="font-mono text-[11px]">Pass: admin123</div>
             </button>
           </div>
         </div>

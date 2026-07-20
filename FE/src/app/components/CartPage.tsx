@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link } from "react-router";
 import { Minus, Plus, Trash2, Tag, ShoppingBag, ArrowRight, Shield, Truck } from "lucide-react";
 import type { CartItem } from "../App";
@@ -21,14 +21,6 @@ export function CartPage({ cartItems, updateQty, removeFromCart }: CartPageProps
   const [couponError, setCouponError] = useState("");
   const [discountValue, setDiscountValue] = useState(0);
   const [discountType, setDiscountType] = useState("percentage");
-  const [availableCoupons, setAvailableCoupons] = useState<any[]>([]);
-
-  useEffect(() => {
-    fetch('/api/coupons')
-      .then(res => res.json())
-      .then(data => setAvailableCoupons(data))
-      .catch(err => console.error("Lỗi tải coupons:", err));
-  }, []);
 
   const subtotal = cartItems.reduce((sum, i) => sum + i.price * i.quantity, 0);
   const discount = discountType === "percentage" ? subtotal * (discountValue / 100) : discountValue;
@@ -164,33 +156,7 @@ export function CartPage({ cartItems, updateQty, removeFromCart }: CartPageProps
         {/* Order Summary */}
         <div>
           <div className="rounded-2xl border p-6 sticky top-24" style={{ background: "#1E293B", borderColor: "rgba(212,175,55,0.2)" }}>
-            <h2 className="text-lg font-bold mb-5" style={{ color: "#F8FAFC" }}>Tóm tắt đơn hàng</h2>
-
-            {/* Free Shipping Progress Bar */}
-            <div className="mb-5 p-4 rounded-xl" style={{ background: "rgba(15,23,42,0.4)" }}>
-              <div className="flex justify-between text-xs mb-1.5 font-semibold">
-                <span style={{ color: subtotal >= 150 ? "#22C55E" : "#94A3B8" }}>
-                  {subtotal >= 150 ? "✓ Đã đủ điều kiện Freeship" : "Freeship cho đơn hàng từ $150"}
-                </span>
-                <span style={{ color: "#D4AF37" }}>
-                  {subtotal >= 150 ? "100%" : `${Math.round((subtotal / 150) * 100)}%`}
-                </span>
-              </div>
-              <div className="w-full h-2 rounded-full overflow-hidden" style={{ background: "#334155" }}>
-                <div 
-                  className="h-full rounded-full transition-all duration-500" 
-                  style={{ 
-                    width: `${Math.min(100, (subtotal / 150) * 100)}%`,
-                    background: subtotal >= 150 ? "linear-gradient(95deg, #22C55E, #16A34A)" : "linear-gradient(95deg, #D4AF37, #A88920)"
-                  }}
-                />
-              </div>
-              {subtotal < 150 && (
-                <p className="text-[11px] mt-2" style={{ color: "#94A3B8" }}>
-                  Mua thêm <span className="font-bold" style={{ color: "#D4AF37" }}>${(150 - subtotal).toFixed(2)}</span> nữa để nhận Freeship!
-                </p>
-              )}
-            </div>
+            <h2 className="text-lg font-bold mb-6" style={{ color: "#F8FAFC" }}>Tóm tắt đơn hàng</h2>
 
             <div className="space-y-3 pb-4 mb-4 border-b" style={{ borderColor: "rgba(212,175,55,0.1)" }}>
               <div className="flex justify-between text-sm">
@@ -243,71 +209,8 @@ export function CartPage({ cartItems, updateQty, removeFromCart }: CartPageProps
                 </button>
               </div>
               {couponError && <p className="text-xs mt-2" style={{ color: "#EF4444" }}>{couponError}</p>}
-              {appliedCoupon && (
-                <p className="text-xs mt-2" style={{ color: "#22C55E" }}>
-                  ✓ Áp dụng mã giảm giá {appliedCoupon} (-{discountType === 'percentage' ? `${discountValue}%` : `$${discountValue}`}) thành công!
-                </p>
-              )}
-
-              {/* Coupon Recommendations list */}
-              {availableCoupons.length > 0 && (
-                <div className="mt-4 pt-4 border-t" style={{ borderColor: "rgba(212,175,55,0.1)" }}>
-                  <div className="text-[11px] font-semibold uppercase tracking-wider mb-2" style={{ color: "#94A3B8" }}>
-                    🎁 Khuyến mãi khả dụng (Bấm áp dụng nhanh)
-                  </div>
-                  <div className="flex flex-col gap-1.5">
-                    {availableCoupons.map((c) => (
-                      <button
-                        key={c.code}
-                        onClick={() => {
-                          setCoupon(c.code);
-                          setCouponError("");
-                          fetch('/api/coupons/validate', {
-                            method: 'POST',
-                            headers: {
-                              'Content-Type': 'application/json',
-                              'Authorization': `Bearer ${localStorage.getItem("token") || ""}`
-                            },
-                            body: JSON.stringify({ code: c.code, subtotal })
-                          })
-                            .then(res => res.json())
-                            .then(data => {
-                              if (data.isValid) {
-                                setAppliedCoupon(data.code);
-                                setDiscountValue(data.discount);
-                                setDiscountType(data.type);
-                                setCouponError("");
-                              } else {
-                                setCouponError(data.message || "Mã không hợp lệ");
-                                setAppliedCoupon("");
-                                setDiscountValue(0);
-                              }
-                            })
-                            .catch(err => {
-                              console.error(err);
-                              setCouponError("Lỗi kết nối");
-                            });
-                        }}
-                        className="text-left p-2 rounded-lg border text-[11px] transition-all hover:bg-slate-800/40 flex items-center justify-between"
-                        style={{ 
-                          borderColor: appliedCoupon === c.code ? "#D4AF37" : "rgba(212,175,55,0.1)",
-                          background: appliedCoupon === c.code ? "rgba(212,175,55,0.05)" : "#0F172A"
-                        }}
-                      >
-                        <div>
-                          <span className="font-mono font-bold" style={{ color: "#D4AF37" }}>{c.code}</span>
-                          <span className="ml-2" style={{ color: "#94A3B8" }}>
-                            {c.type === 'percentage' ? `Giảm ${c.discount}%` : `Giảm $${c.discount}`} (Tối thiểu ${c.minSpend})
-                          </span>
-                        </div>
-                        <span style={{ color: appliedCoupon === c.code ? "#22C55E" : "#94A3B8" }}>
-                          {appliedCoupon === c.code ? "✓ Đang dùng" : "Chọn"}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
+              {appliedCoupon && <p className="text-xs mt-2" style={{ color: "#22C55E" }}>✓ Áp dụng mã giảm giá thành công!</p>}
+              <p className="text-xs mt-2" style={{ color: "#64748B" }}>Mã gợi ý: PROSHOT</p>
             </div>
 
             <Link

@@ -10,6 +10,7 @@ import analyticsRoutes from './routes/analyticsRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import categoryRoutes from './routes/categoryRoutes.js';
 import couponRoutes from './routes/couponRoutes.js';
+import marketplaceRoutes from './routes/marketplaceRoutes.js';
 
 // Cấu hình dotenv
 dotenv.config();
@@ -32,6 +33,7 @@ app.use('/api/customers', customerRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/coupons', couponRoutes);
+app.use('/api/marketplace', marketplaceRoutes);
 
 // Base route for sanity check
 app.get('/', (req, res) => {

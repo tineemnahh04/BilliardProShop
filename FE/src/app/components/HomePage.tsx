@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router";
 import {
   ArrowRight, Star, Shield, Truck, RotateCcw, Award,
-  ChevronLeft, ChevronRight, Quote, Target, Zap, Package, BookOpen, Hand, Circle
+  ChevronLeft, ChevronRight, Quote, Target, Zap, Package, BookOpen, Hand, Circle, Sparkles
 } from "lucide-react";
 import type { CartItem } from "../App";
 
@@ -251,18 +251,18 @@ export function HomePage({ addToCart, wishlist, toggleWishlist }: HomePageProps)
 
             <div className="flex flex-wrap gap-4">
               <Link
-                to="/products"
-                className="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl font-semibold text-sm transition-all hover:opacity-90"
-                style={{ background: "linear-gradient(135deg, #D4AF37, #A88920)", color: "#0F172A" }}
+                to="/ai-cue-finder"
+                className="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl font-bold text-sm transition-all hover:brightness-110 shadow-lg shadow-yellow-500/20"
+                style={{ background: "linear-gradient(135deg, #FACC15, #D4AF37)", color: "#0F172A" }}
               >
-                Mua Ngay <ArrowRight className="w-4 h-4" />
+                <Sparkles className="w-4 h-4 text-slate-950 animate-pulse" /> AI Cue Finder
               </Link>
               <Link
-                to="/products?cat=pool-cues"
+                to="/products"
                 className="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl font-semibold text-sm border transition-all hover:bg-white/5"
                 style={{ borderColor: "rgba(248,250,252,0.3)", color: "#F8FAFC" }}
               >
-                Xem Mẫu Cơ
+                Tất Cả Sản Phẩm <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
 
@@ -322,6 +322,55 @@ export function HomePage({ addToCart, wishlist, toggleWishlist }: HomePageProps)
               </div>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* AI Cue Finder Promo Banner */}
+      <section className="max-w-[1440px] mx-auto px-6 pt-12">
+        <div 
+          className="rounded-3xl p-8 md:p-12 relative overflow-hidden border flex flex-col md:flex-row items-center justify-between gap-8"
+          style={{
+            background: "linear-gradient(135deg, #1E293B 0%, #0F172A 100%)",
+            borderColor: "rgba(212,175,55,0.3)",
+            boxShadow: "0 25px 50px -12px rgba(212, 175, 55, 0.1)"
+          }}
+        >
+          <div className="absolute -right-20 -top-20 w-80 h-80 rounded-full bg-yellow-500/10 blur-3xl pointer-events-none" />
+          <div className="space-y-4 max-w-2xl relative z-10">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full border border-yellow-500/30 bg-yellow-500/10 text-yellow-400 text-xs font-bold uppercase tracking-wider">
+              <Sparkles className="w-3.5 h-3.5 animate-pulse text-yellow-400" /> AI Personal Assistant
+            </div>
+            <h2 className="text-2xl md:text-4xl font-extrabold text-white leading-tight font-display">
+              Chưa biết chọn cây cơ nào phù hợp nhất?
+            </h2>
+            <p className="text-slate-300 text-sm md:text-base leading-relaxed">
+              Trải nghiệm ngay <strong className="text-yellow-400">AI Cue Finder</strong> — Nhập chiều cao, lực đánh, trình độ và ngân sách để nhận tư vấn cây cơ 🎱 hoàn hảo được tối ưu hóa riêng cho bạn trong 30 giây!
+            </p>
+            <div className="pt-2 flex flex-wrap items-center gap-4">
+              <Link
+                to="/ai-cue-finder"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-extrabold text-sm transition-all hover:brightness-110 shadow-lg shadow-yellow-500/20"
+                style={{ background: "linear-gradient(135deg, #FACC15, #D4AF37)", color: "#0F172A" }}
+              >
+                <Sparkles className="w-4 h-4 text-slate-950" /> Thử AI Cue Finder Ngay
+              </Link>
+              <span className="text-xs text-slate-400">✔ Miễn phí 100% · ✔ Tư vấn chính xác dựa trên thông số</span>
+            </div>
+          </div>
+
+          <div className="relative z-10 shrink-0 w-full md:w-auto flex justify-center">
+            <div className="p-6 rounded-2xl border border-yellow-500/20 bg-slate-900/80 backdrop-blur-md max-w-xs space-y-3 shadow-2xl">
+              <div className="text-xs text-yellow-400 font-bold uppercase tracking-wider flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5" /> Gợi ý mẫu
+              </div>
+              <div className="text-sm font-extrabold text-white">Mezz EC9 / Predator 314</div>
+              <ul className="text-xs space-y-1.5 text-slate-300">
+                <li className="text-emerald-400 font-medium">✔ Phù hợp trình độ & lực đánh</li>
+                <li className="text-emerald-400 font-medium">✔ Cân bằng trọng lượng chuẩn theo chiều cao</li>
+                <li className="text-emerald-400 font-medium">✔ Chuẩn ngân sách lựa chọn</li>
+              </ul>
+            </div>
+          </div>
         </div>
       </section>
 

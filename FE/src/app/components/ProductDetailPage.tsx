@@ -32,54 +32,6 @@ export function ProductDetailPage({ addToCart, wishlist, toggleWishlist }: Produ
   const [addedToCart, setAddedToCart] = useState(false);
   const [activeTab, setActiveTab] = useState<"description" | "specs" | "reviews">("description");
 
-  // States cho đăng đánh giá
-  const [reviewRating, setReviewRating] = useState(5);
-  const [reviewText, setReviewText] = useState("");
-  const [reviewError, setReviewError] = useState("");
-  const [reviewSuccess, setReviewSuccess] = useState("");
-  const [submittingReview, setSubmittingReview] = useState(false);
-
-  const currentUserSaved = localStorage.getItem("user");
-  const currentUser = currentUserSaved ? JSON.parse(currentUserSaved) : null;
-
-  const handleAddReview = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!reviewText.trim()) {
-      setReviewError("Nội dung đánh giá không được để trống");
-      return;
-    }
-    
-    setSubmittingReview(true);
-    setReviewError("");
-    setReviewSuccess("");
-
-    fetch(`/api/products/${product.id}/reviews`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${localStorage.getItem("token") || ""}`
-      },
-      body: JSON.stringify({ rating: reviewRating, text: reviewText })
-    })
-      .then(async res => {
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message || "Lỗi khi gửi đánh giá");
-        return data;
-      })
-      .then(data => {
-        setReviewSuccess("Đăng nhận xét thành công!");
-        setReviewText("");
-        setReviewRating(5);
-        setProduct(data.product);
-      })
-      .catch(err => {
-        setReviewError(err.message);
-      })
-      .finally(() => {
-        setSubmittingReview(false);
-      });
-  };
-
   useEffect(() => {
     if (!id) return;
     setLoading(true);
@@ -238,11 +190,6 @@ export function ProductDetailPage({ addToCart, wishlist, toggleWishlist }: Produ
               <span className="text-xs px-3 py-1 rounded-full ml-auto" style={{ background: product.inStock ? "rgba(34,197,94,0.15)" : "rgba(239,68,68,0.15)", color: product.inStock ? "#22C55E" : "#EF4444" }}>
                 {product.inStock ? "● Còn hàng" : "● Hết hàng"}
               </span>
-              {product.inStock && product.stock > 0 && product.stock <= 3 && (
-                <span className="text-xs px-3 py-1 rounded-full ml-2 animate-pulse font-bold" style={{ background: "rgba(239,68,68,0.15)", color: "#EF4444" }}>
-                  ⚠ Chỉ còn {product.stock} sản phẩm!
-                </span>
-              )}
             </div>
 
             <h1 className="text-3xl font-bold mb-3" style={{ color: "#F8FAFC" }}>
@@ -356,12 +303,7 @@ export function ProductDetailPage({ addToCart, wishlist, toggleWishlist }: Produ
                   <Minus className="w-4 h-4" />
                 </button>
                 <span className="w-12 text-center text-sm font-semibold" style={{ color: "#F8FAFC" }}>{qty}</span>
-                <button 
-                  onClick={() => setQty(Math.min(product.stock, qty + 1))} 
-                  disabled={qty >= product.stock}
-                  className="w-10 h-10 flex items-center justify-center transition-colors hover:bg-white/5 disabled:opacity-30" 
-                  style={{ color: "#F8FAFC" }}
-                >
+                <button onClick={() => setQty(qty + 1)} className="w-10 h-10 flex items-center justify-center transition-colors hover:bg-white/5" style={{ color: "#F8FAFC" }}>
                   <Plus className="w-4 h-4" />
                 </button>
               </div>
@@ -458,59 +400,7 @@ export function ProductDetailPage({ addToCart, wishlist, toggleWishlist }: Produ
         )}
 
         {activeTab === "reviews" && (
-          <div className="mb-12 space-y-6">
-            {/* Form viết đánh giá mới */}
-            <div className="rounded-2xl border p-6" style={{ background: "#1E293B", borderColor: "rgba(212,175,55,0.2)" }}>
-              <h3 className="text-base font-semibold mb-4" style={{ color: "#F8FAFC" }}>Gửi nhận xét của bạn</h3>
-              {currentUser ? (
-                <form onSubmit={handleAddReview} className="space-y-4">
-                  {reviewError && <p className="text-xs text-red-500">⚠ {reviewError}</p>}
-                  {reviewSuccess && <p className="text-xs text-green-500">✓ {reviewSuccess}</p>}
-                  
-                  <div>
-                    <label className="block text-xs font-semibold mb-2 uppercase tracking-wider" style={{ color: "#94A3B8" }}>Chọn số sao đánh giá</label>
-                    <div className="flex gap-1.5">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <button
-                          type="button"
-                          key={star}
-                          onClick={() => setReviewRating(star)}
-                          className="p-1 transition-transform hover:scale-110"
-                        >
-                          <Star className="w-6 h-6 fill-current" style={{ color: star <= reviewRating ? "#D4AF37" : "#334155" }} />
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold mb-2 uppercase tracking-wider" style={{ color: "#94A3B8" }}>Nội dung nhận xét</label>
-                    <textarea
-                      rows={3}
-                      required
-                      value={reviewText}
-                      onChange={e => setReviewText(e.target.value)}
-                      placeholder="Bạn nghĩ gì về cây cơ bida này? Hãy chia sẻ cảm nhận thực tế..."
-                      className="w-full px-4 py-3 rounded-xl border text-sm outline-none bg-slate-900 border-slate-700 text-slate-100 transition-all focus:border-yellow-500"
-                    />
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={submittingReview}
-                    className="px-6 py-2.5 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all disabled:opacity-50"
-                    style={{ background: "linear-gradient(135deg, #D4AF37, #A88920)", color: "#0F172A" }}
-                  >
-                    {submittingReview ? "Đang gửi..." : "Gửi đánh giá"}
-                  </button>
-                </form>
-              ) : (
-                <p className="text-xs text-center py-2" style={{ color: "#94A3B8" }}>
-                  Bạn cần <Link to="/login" className="font-bold underline" style={{ color: "#D4AF37" }}>đăng nhập</Link> để viết nhận xét đánh giá sản phẩm này.
-                </p>
-              )}
-            </div>
-
+          <div className="mb-12 space-y-4">
             {(!product.reviewsList || product.reviewsList.length === 0) ? (
               <div className="text-center py-10 text-slate-400 text-sm">Chưa có đánh giá nào cho sản phẩm này.</div>
             ) : (

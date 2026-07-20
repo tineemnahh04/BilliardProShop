@@ -222,56 +222,116 @@ export const productController = {
     }
   },
 
-  // Thêm đánh giá mới (reviewsList & recalculate rating)
-  addReview: async (req, res) => {
+  // AI Cue Finder Recommendation Engine
+  aiRecommend: async (req, res) => {
     try {
-      const id = parseInt(req.params.id);
-      const { rating, text } = req.body;
+      const { height, strokePower, skillLevel, gameType, maxBudget } = req.body;
 
-      if (isNaN(id)) {
-        return res.status(400).json({ message: 'ID sản phẩm không hợp lệ' });
+      const products = await Product.find({ inStock: true });
+      if (!products || products.length === 0) {
+        return res.status(404).json({ message: 'Hiện chưa có sản phẩm trong hệ thống' });
       }
 
-      if (!rating || !text) {
-        return res.status(400).json({ message: 'Số sao và nội dung đánh giá là bắt buộc' });
+      // Convert maxBudget to USD for comparison if passed in VND
+      let budgetUsd = parseFloat(maxBudget) || 1000;
+      if (budgetUsd > 10000) {
+        budgetUsd = budgetUsd / 25000;
       }
 
-      const ratingNum = parseFloat(rating);
-      if (isNaN(ratingNum) || ratingNum < 1 || ratingNum > 5) {
-        return res.status(400).json({ message: 'Số sao phải từ 1 đến 5' });
-      }
+      // Determine category preference
+      let targetCategory = '';
+      if (gameType === 'pool') targetCategory = 'pool-cues';
+      else if (gameType === 'carom') targetCategory = 'carom-cues';
+      else if (gameType === 'break_jump') targetCategory = 'break-jump';
 
-      const product = await Product.findOne({ id });
-      if (!product) {
-        return res.status(404).json({ message: 'Sản phẩm không tồn tại' });
-      }
+      // Score each product
+      const scoredProducts = products.map(p => {
+        let score = 50;
 
-      // Thêm vào reviewsList
-      const newReview = {
-        name: req.user.name,
-        rating: ratingNum,
-        date: new Date().toLocaleDateString('vi-VN'),
-        text,
-        verified: true
+        // Category match
+        if (targetCategory && p.category === targetCategory) score += 30;
+        else if (p.category.includes('cue') || p.category === 'pool-cues' || p.category === 'carom-cues') score += 15;
+
+        // Budget match
+        if (p.price <= budgetUsd) {
+          score += 25;
+          const ratio = p.price / budgetUsd;
+          score += ratio * 10;
+        } else {
+          const diffRatio = (p.price - budgetUsd) / budgetUsd;
+          score -= diffRatio * 30;
+        }
+
+        // Skill level preference
+        if (skillLevel === 'beginner') {
+          if (p.price <= 350) score += 15;
+          if (p.brand === 'Fury' || p.brand === 'JFlowers' || p.brand === 'Cuetec') score += 10;
+        } else if (skillLevel === 'advanced') {
+          if (p.brand === 'Predator' || p.brand === 'Mezz' || p.brand === 'Kamui') score += 15;
+          if (p.price > 250) score += 10;
+        }
+
+        // Rating bonus
+        score += (p.rating || 4.5) * 2;
+
+        return { product: p, score: Math.round(score) };
+      });
+
+      scoredProducts.sort((a, b) => b.score - a.score);
+
+      const topItem = scoredProducts[0];
+      const recommendedCue = topItem.product;
+      const matchPercentage = Math.min(99, Math.max(85, topItem.score));
+
+      const skillTextMap = {
+        beginner: 'Suitable for beginners',
+        intermediate: 'Suitable for intermediate players',
+        advanced: 'Suitable for advanced & pro players'
       };
 
-      if (!product.reviewsList) {
-        product.reviewsList = [];
+      const strokeTextMap = {
+        light: 'Soft hit feel with smooth cueing speed',
+        medium: 'Medium hit feel & balanced weight',
+        strong: 'Solid stiff hit feel with max power transfer',
+        break: 'Explosive hit for break shots'
+      };
+
+      const heightTextMap = {
+        under_160: 'Easy control (18.5 - 19.0 oz weight)',
+        '160_175': 'Easy control (19.0 - 19.5 oz weight)',
+        above_175: 'Comfortable reach (19.5 - 20.0 oz weight)'
+      };
+
+      let budgetLabel = '';
+      const numBudget = parseFloat(maxBudget) || 6000000;
+      if (numBudget > 10000) {
+        budgetLabel = `Budget under ${(numBudget / 1000000).toFixed(0)} million VND`;
+      } else {
+        budgetLabel = `Budget under $${budgetUsd.toFixed(0)}`;
       }
-      product.reviewsList.push(newReview);
 
-      // Tính lại rating trung bình và tổng số đánh giá
-      const totalStars = product.reviewsList.reduce((sum, r) => sum + r.rating, 0);
-      product.rating = parseFloat((totalStars / product.reviewsList.length).toFixed(1));
-      product.reviews = product.reviewsList.length;
+      const reasons = [
+        `✔ ${skillTextMap[skillLevel] || 'Suitable for beginners'}`,
+        `✔ ${strokeTextMap[strokePower] || 'Medium hit feel'}`,
+        `✔ ${heightTextMap[height] || 'Easy control'}`,
+        `✔ ${budgetLabel}`
+      ];
 
-      await product.save();
-      res.status(201).json({
-        message: 'Đăng đánh giá thành công!',
-        product
+      const runnerUps = scoredProducts.slice(1, 3).map(sp => sp.product);
+
+      res.json({
+        recommendedCue,
+        matchPercentage,
+        reasons,
+        runnerUps,
+        advisorSpecs: {
+          recommendedWeight: height === 'under_160' ? '18.5 oz - 19 oz' : height === 'above_175' ? '19.5 oz - 20 oz' : '19 oz - 19.5 oz',
+          recommendedTipSize: skillLevel === 'beginner' ? '12.5mm - 13.0mm' : '11.8mm - 12.5mm',
+          shaftType: strokePower === 'strong' || skillLevel === 'advanced' ? 'Ngọn Sợi Carbon' : 'Ngọn Gỗ Công Nghệ Trợ Lực'
+        }
       });
     } catch (error) {
-      res.status(500).json({ message: 'Lỗi khi đăng đánh giá', error: error.message });
+      res.status(500).json({ message: 'Lỗi khi tư vấn gợi ý sản phẩm', error: error.message });
     }
   }
 };

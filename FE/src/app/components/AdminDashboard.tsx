@@ -95,6 +95,21 @@ export function AdminDashboard() {
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
 
+  // Coupon States
+  const [coupons, setCoupons] = useState<any[]>([]);
+  const [showAddCouponModal, setShowAddCouponModal] = useState(false);
+  const [showEditCouponModal, setShowEditCouponModal] = useState(false);
+  const [showDeleteCouponModal, setShowDeleteCouponModal] = useState(false);
+  const [selectedCoupon, setSelectedCoupon] = useState<any>(null);
+  const [couponForm, setCouponForm] = useState({
+    code: "",
+    discount: "",
+    type: "percentage",
+    minSpend: "0",
+    isActive: true,
+    expiryDate: ""
+  });
+
   // Form States
   const [productForm, setProductForm] = useState({
     name: "", brand: "", category: "", price: "", originalPrice: "",
@@ -108,13 +123,15 @@ export function AdminDashboard() {
       fetch('/api/products', { headers: authHeaders }).then(res => res.json()),
       fetch('/api/orders', { headers: authHeaders }).then(res => res.json()),
       fetch('/api/customers', { headers: authHeaders }).then(res => res.json()),
-      fetch('/api/analytics', { headers: authHeaders }).then(res => res.json())
+      fetch('/api/analytics', { headers: authHeaders }).then(res => res.json()),
+      fetch('/api/coupons', { headers: authHeaders }).then(res => res.json())
     ])
-      .then(([prods, ords, custs, analy]) => {
+      .then(([prods, ords, custs, analy, coups]) => {
         setProducts(prods);
         setOrders(ords);
         setCustomers(custs);
         setAnalytics(analy);
+        setCoupons(Array.isArray(coups) ? coups : []);
         setLoading(false);
       })
       .catch(err => {
@@ -202,6 +219,132 @@ export function AdminDashboard() {
       name: "", brand: "", category: "", price: "", originalPrice: "",
       stock: "", badge: "", sku: "", image: "", description: ""
     });
+  };
+
+  const resetCouponForm = () => {
+    setCouponForm({
+      code: "",
+      discount: "",
+      type: "percentage",
+      minSpend: "0",
+      isActive: true,
+      expiryDate: ""
+    });
+  };
+
+  const openAddCouponModal = () => {
+    resetCouponForm();
+    setShowAddCouponModal(true);
+  };
+
+  const openEditCouponModal = (coupon: any) => {
+    setSelectedCoupon(coupon);
+    let formattedDate = "";
+    if (coupon.expiryDate) {
+      const date = new Date(coupon.expiryDate);
+      if (!isNaN(date.getTime())) {
+        formattedDate = date.toISOString().split('T')[0];
+      }
+    }
+    setCouponForm({
+      code: coupon.code,
+      discount: coupon.discount.toString(),
+      type: coupon.type,
+      minSpend: coupon.minSpend ? coupon.minSpend.toString() : "0",
+      isActive: coupon.isActive,
+      expiryDate: formattedDate
+    });
+    setShowEditCouponModal(true);
+  };
+
+  const openDeleteCouponModal = (coupon: any) => {
+    setSelectedCoupon(coupon);
+    setShowDeleteCouponModal(true);
+  };
+
+  const handleAddCoupon = (e: React.FormEvent) => {
+    e.preventDefault();
+    fetch('/api/coupons', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token') || ''}`
+      },
+      body: JSON.stringify({
+        ...couponForm,
+        expiryDate: couponForm.expiryDate || null
+      })
+    })
+      .then(res => {
+        if (!res.ok) {
+          return res.json().then(err => { throw new Error(err.message || 'Lỗi thêm mã giảm giá') });
+        }
+        return res.json();
+      })
+      .then(() => {
+        setShowAddCouponModal(false);
+        resetCouponForm();
+        loadData();
+      })
+      .catch(err => {
+        alert(err.message || "Lỗi khi thêm mã giảm giá");
+        console.error(err);
+      });
+  };
+
+  const handleEditCoupon = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedCoupon) return;
+    fetch(`/api/coupons/${selectedCoupon._id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token') || ''}`
+      },
+      body: JSON.stringify({
+        ...couponForm,
+        expiryDate: couponForm.expiryDate || null
+      })
+    })
+      .then(res => {
+        if (!res.ok) {
+          return res.json().then(err => { throw new Error(err.message || 'Lỗi cập nhật mã giảm giá') });
+        }
+        return res.json();
+      })
+      .then(() => {
+        setShowEditCouponModal(false);
+        setSelectedCoupon(null);
+        resetCouponForm();
+        loadData();
+      })
+      .catch(err => {
+        alert(err.message || "Lỗi khi cập nhật mã giảm giá");
+        console.error(err);
+      });
+  };
+
+  const handleDeleteCoupon = () => {
+    if (!selectedCoupon) return;
+    fetch(`/api/coupons/${selectedCoupon._id}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${localStorage.getItem('token') || ''}` }
+    })
+      .then(res => {
+        if (!res.ok) {
+          return res.json().then(err => { throw new Error(err.message || 'Lỗi xóa mã giảm giá') });
+        }
+        return res.json();
+      })
+      .then(() => {
+        setShowDeleteCouponModal(false);
+        setSelectedCoupon(null);
+        loadData();
+      })
+      .catch(err => {
+        alert(err.message || "Lỗi khi xóa mã giảm giá");
+        console.error(err);
+      });
   };
 
   const openEditModal = (prod: any) => {
@@ -821,31 +964,64 @@ export function AdminDashboard() {
           {activeSection === "promotions" && (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <h2 className="text-base font-semibold" style={{ color: "#F8FAFC" }}>Các mã giảm giá đang hoạt động</h2>
+                <h2 className="text-base font-semibold" style={{ color: "#F8FAFC" }}>Quản lý các mã giảm giá</h2>
+                <button
+                  onClick={openAddCouponModal}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold hover:opacity-90 transition-all"
+                  style={{ background: "linear-gradient(135deg, #D4AF37, #A88920)", color: "#0F172A" }}
+                >
+                  <Plus className="w-3.5 h-3.5" /> Thêm mã giảm giá
+                </button>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {[
-                  { code: "PROSHOT", discount: "Giảm 10%", type: "Tất cả sản phẩm", uses: 283, expires: "30/06/2026", active: true },
-                  { code: "PREDATOR30", discount: "Giảm 30%", type: "Chỉ cơ Predator", uses: 94, expires: "20/06/2026", active: true },
-                  { code: "SUMMER2026", discount: "Giảm 15%", type: "Đơn hàng từ $200", uses: 421, expires: "31/08/2026", active: true },
-                  { code: "NEWCUSTOMER", discount: "Giảm $20", type: "Khách hàng mới", uses: 1024, expires: "31/12/2026", active: false },
-                ].map((promo) => (
-                  <div key={promo.code} className="rounded-2xl border p-5" style={{ background: "#1E293B", borderColor: "rgba(212,175,55,0.15)" }}>
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="font-mono text-base font-bold" style={{ color: "#D4AF37" }}>{promo.code}</span>
-                      <span className="text-xs px-2.5 py-1 rounded-full font-medium" style={{ background: promo.active ? "rgba(34,197,94,0.15)" : "rgba(239,68,68,0.15)", color: promo.active ? "#22C55E" : "#EF4444" }}>
-                        {promo.active ? "Đang chạy" : "Tạm ngưng"}
-                      </span>
+
+              {coupons.length === 0 ? (
+                <div className="text-center py-10 rounded-2xl border" style={{ background: "#1E293B", borderColor: "rgba(212,175,55,0.15)" }}>
+                  <Tag className="w-10 h-10 mx-auto mb-3" style={{ color: "#D4AF37" }} />
+                  <p className="text-sm font-medium" style={{ color: "#94A3B8" }}>Chưa có mã giảm giá nào được tạo.</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {coupons.map((promo) => (
+                    <div key={promo._id} className="rounded-2xl border p-5 relative group" style={{ background: "#1E293B", borderColor: "rgba(212,175,55,0.15)" }}>
+                      {/* Actions */}
+                      <div className="absolute top-4 right-4 flex items-center gap-2 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button
+                          onClick={() => openEditCouponModal(promo)}
+                          className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+                          title="Sửa mã"
+                        >
+                          <Edit2 className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => openDeleteCouponModal(promo)}
+                          className="p-1.5 rounded-lg text-red-400 hover:text-red-300 hover:bg-red-950/40 transition-colors"
+                          title="Xóa mã"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+
+                      <div className="flex items-center justify-between mb-3 pr-14">
+                        <span className="font-mono text-base font-bold" style={{ color: "#D4AF37" }}>{promo.code}</span>
+                        <span className="text-xs px-2.5 py-1 rounded-full font-medium" style={{ background: promo.isActive ? "rgba(34,197,94,0.15)" : "rgba(239,68,68,0.15)", color: promo.isActive ? "#22C55E" : "#EF4444" }}>
+                          {promo.isActive ? "Đang chạy" : "Tạm ngưng"}
+                        </span>
+                      </div>
+                      
+                      <div className="text-xl font-bold mb-1" style={{ color: "#F8FAFC" }}>
+                        {promo.type === "percentage" ? `Giảm ${promo.discount}%` : `Giảm $${promo.discount}`}
+                      </div>
+                      <div className="text-xs mb-3" style={{ color: "#94A3B8" }}>
+                        {promo.minSpend > 0 ? `Áp dụng đơn hàng từ $${promo.minSpend}` : "Không giới hạn chi tiêu tối thiểu"}
+                      </div>
+                      <div className="flex items-center justify-between text-xs" style={{ color: "#64748B" }}>
+                        <span>Loại: {promo.type === "percentage" ? "Theo phần trăm" : "Cố định"}</span>
+                        <span>Hạn dùng: {promo.expiryDate ? new Date(promo.expiryDate).toLocaleDateString("vi-VN") : "Không giới hạn"}</span>
+                      </div>
                     </div>
-                    <div className="text-xl font-bold mb-1" style={{ color: "#F8FAFC" }}>{promo.discount}</div>
-                    <div className="text-xs mb-3" style={{ color: "#94A3B8" }}>{promo.type}</div>
-                    <div className="flex items-center justify-between text-xs" style={{ color: "#64748B" }}>
-                      <span>{promo.uses} lượt dùng</span>
-                      <span>Hạn dùng: {promo.expires}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
@@ -1101,6 +1277,226 @@ export function AdminDashboard() {
             <div className="flex gap-3 justify-end">
               <button onClick={() => { setShowDeleteModal(false); setSelectedProduct(null); }} className="px-4 py-2 border rounded-xl text-sm font-semibold border-slate-700 text-slate-400 hover:bg-slate-800">Quay lại</button>
               <button onClick={handleDeleteProduct} className="px-5 py-2 rounded-xl text-sm font-semibold bg-red-600 hover:bg-red-700 text-white">Chấp nhận xóa</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── ADD COUPON MODAL ───────────────────────────────────── */}
+      {showAddCouponModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(15,23,42,0.8)", backdropFilter: "blur(4px)" }}>
+          <div className="w-full max-w-lg rounded-2xl border p-6 max-h-[90vh] overflow-y-auto" style={{ background: "#1E293B", borderColor: "rgba(212,175,55,0.3)" }}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold text-slate-100">Tạo mã giảm giá mới</h3>
+              <button onClick={() => setShowAddCouponModal(false)} className="text-slate-400 hover:text-white">✕</button>
+            </div>
+            <form onSubmit={handleAddCoupon} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-400 mb-1">Mã giảm giá (Code) *</label>
+                <input
+                  required
+                  placeholder="VD: PROSHOT, WELCOME10..."
+                  value={couponForm.code}
+                  onChange={e => setCouponForm({...couponForm, code: e.target.value.toUpperCase()})}
+                  className="w-full px-3 py-2 rounded-lg border text-sm bg-slate-900 border-slate-700 text-slate-100 uppercase"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-400 mb-1">Loại giảm giá *</label>
+                  <select
+                    value={couponForm.type}
+                    onChange={e => setCouponForm({...couponForm, type: e.target.value})}
+                    className="w-full px-3 py-2 rounded-lg border text-sm bg-slate-900 border-slate-700 text-slate-100"
+                  >
+                    <option value="percentage">Phần trăm (%)</option>
+                    <option value="fixed">Số tiền cố định ($)</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-400 mb-1">Mức giảm giá *</label>
+                  <input
+                    required
+                    type="number"
+                    min="0.01"
+                    step="0.01"
+                    placeholder="VD: 10, 15..."
+                    value={couponForm.discount}
+                    onChange={e => setCouponForm({...couponForm, discount: e.target.value})}
+                    className="w-full px-3 py-2 rounded-lg border text-sm bg-slate-900 border-slate-700 text-slate-100"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-400 mb-1">Chi tiêu tối thiểu ($)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={couponForm.minSpend}
+                    onChange={e => setCouponForm({...couponForm, minSpend: e.target.value})}
+                    className="w-full px-3 py-2 rounded-lg border text-sm bg-slate-900 border-slate-700 text-slate-100"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-400 mb-1">Hạn sử dụng</label>
+                  <input
+                    type="date"
+                    value={couponForm.expiryDate}
+                    onChange={e => setCouponForm({...couponForm, expiryDate: e.target.value})}
+                    className="w-full px-3 py-2 rounded-lg border text-sm bg-slate-900 border-slate-700 text-slate-100"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-400 mb-1">Trạng thái</label>
+                <select
+                  value={couponForm.isActive ? "true" : "false"}
+                  onChange={e => setCouponForm({...couponForm, isActive: e.target.value === "true"})}
+                  className="w-full px-3 py-2 rounded-lg border text-sm bg-slate-900 border-slate-700 text-slate-100"
+                >
+                  <option value="true">Đang hoạt động (Kích hoạt)</option>
+                  <option value="false">Tạm ngưng</option>
+                </select>
+              </div>
+
+              <div className="flex gap-3 justify-end pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowAddCouponModal(false)}
+                  className="px-4 py-2 border rounded-xl text-sm font-semibold border-slate-700 text-slate-400 hover:bg-slate-800"
+                >
+                  Hủy
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 rounded-xl text-sm font-semibold"
+                  style={{ background: "linear-gradient(135deg, #D4AF37, #A88920)", color: "#0F172A" }}
+                >
+                  Tạo mã
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ── EDIT COUPON MODAL ──────────────────────────────────── */}
+      {showEditCouponModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(15,23,42,0.8)", backdropFilter: "blur(4px)" }}>
+          <div className="w-full max-w-lg rounded-2xl border p-6 max-h-[90vh] overflow-y-auto" style={{ background: "#1E293B", borderColor: "rgba(212,175,55,0.3)" }}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold text-slate-100">Chỉnh sửa mã giảm giá</h3>
+              <button onClick={() => { setShowEditCouponModal(false); setSelectedCoupon(null); }} className="text-slate-400 hover:text-white">✕</button>
+            </div>
+            <form onSubmit={handleEditCoupon} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-400 mb-1">Mã giảm giá (Code) *</label>
+                <input
+                  required
+                  placeholder="VD: PROSHOT, WELCOME10..."
+                  value={couponForm.code}
+                  onChange={e => setCouponForm({...couponForm, code: e.target.value.toUpperCase()})}
+                  className="w-full px-3 py-2 rounded-lg border text-sm bg-slate-900 border-slate-700 text-slate-100 uppercase"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-400 mb-1">Loại giảm giá *</label>
+                  <select
+                    value={couponForm.type}
+                    onChange={e => setCouponForm({...couponForm, type: e.target.value})}
+                    className="w-full px-3 py-2 rounded-lg border text-sm bg-slate-900 border-slate-700 text-slate-100"
+                  >
+                    <option value="percentage">Phần trăm (%)</option>
+                    <option value="fixed">Số tiền cố định ($)</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-400 mb-1">Mức giảm giá *</label>
+                  <input
+                    required
+                    type="number"
+                    min="0.01"
+                    step="0.01"
+                    placeholder="VD: 10, 15..."
+                    value={couponForm.discount}
+                    onChange={e => setCouponForm({...couponForm, discount: e.target.value})}
+                    className="w-full px-3 py-2 rounded-lg border text-sm bg-slate-900 border-slate-700 text-slate-100"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-400 mb-1">Chi tiêu tối thiểu ($)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={couponForm.minSpend}
+                    onChange={e => setCouponForm({...couponForm, minSpend: e.target.value})}
+                    className="w-full px-3 py-2 rounded-lg border text-sm bg-slate-900 border-slate-700 text-slate-100"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-400 mb-1">Hạn sử dụng</label>
+                  <input
+                    type="date"
+                    value={couponForm.expiryDate}
+                    onChange={e => setCouponForm({...couponForm, expiryDate: e.target.value})}
+                    className="w-full px-3 py-2 rounded-lg border text-sm bg-slate-900 border-slate-700 text-slate-100"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-400 mb-1">Trạng thái</label>
+                <select
+                  value={couponForm.isActive ? "true" : "false"}
+                  onChange={e => setCouponForm({...couponForm, isActive: e.target.value === "true"})}
+                  className="w-full px-3 py-2 rounded-lg border text-sm bg-slate-900 border-slate-700 text-slate-100"
+                >
+                  <option value="true">Đang hoạt động (Kích hoạt)</option>
+                  <option value="false">Tạm ngưng</option>
+                </select>
+              </div>
+
+              <div className="flex gap-3 justify-end pt-2">
+                <button
+                  type="button"
+                  onClick={() => { setShowEditCouponModal(false); setSelectedCoupon(null); }}
+                  className="px-4 py-2 border rounded-xl text-sm font-semibold border-slate-700 text-slate-400 hover:bg-slate-800"
+                >
+                  Hủy
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 rounded-xl text-sm font-semibold"
+                  style={{ background: "linear-gradient(135deg, #D4AF37, #A88920)", color: "#0F172A" }}
+                >
+                  Lưu lại
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ── DELETE COUPON CONFIRM MODAL ────────────────────────── */}
+      {showDeleteCouponModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(15,23,42,0.8)", backdropFilter: "blur(4px)" }}>
+          <div className="w-full max-w-md rounded-2xl border p-6" style={{ background: "#1E293B", borderColor: "rgba(239,68,68,0.3)" }}>
+            <h3 className="text-lg font-bold text-slate-100 mb-2">Xác nhận xóa mã giảm giá</h3>
+            <p className="text-sm text-slate-400 mb-6">Bạn có chắc chắn muốn xóa mã giảm giá <strong className="text-slate-200">"{selectedCoupon?.code}"</strong> không? Hành động này sẽ cập nhật CSDL và không thể hoàn tác.</p>
+            <div className="flex gap-3 justify-end">
+              <button onClick={() => { setShowDeleteCouponModal(false); setSelectedCoupon(null); }} className="px-4 py-2 border rounded-xl text-sm font-semibold border-slate-700 text-slate-400 hover:bg-slate-800">Quay lại</button>
+              <button onClick={handleDeleteCoupon} className="px-5 py-2 rounded-xl text-sm font-semibold bg-red-600 hover:bg-red-700 text-white">Chấp nhận xóa</button>
             </div>
           </div>
         </div>

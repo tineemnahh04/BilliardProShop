@@ -11,6 +11,9 @@ import { CheckoutPage } from "./components/CheckoutPage";
 import { AccountPage } from "./components/AccountPage";
 import { AdminDashboard } from "./components/AdminDashboard";
 import { AuthPage } from "./components/AuthPage";
+import { AICueFinderPage } from "./components/AICueFinderPage";
+import { MarketplacePage } from "./components/MarketplacePage";
+import { MarketplaceDetailPage } from "./components/MarketplaceDetailPage";
 
 export type CartItem = {
   id: number;
@@ -135,11 +138,15 @@ export default function App() {
                   wishlistCount={wishlist.length} 
                   currentUser={currentUser} 
                   onLogout={handleLogout} 
+                  onSwitchAccount={handleLoginSuccess}
                 />
                 <Routes>
                   <Route path="/" element={<HomePage addToCart={addToCart} wishlist={wishlist} toggleWishlist={toggleWishlist} />} />
                   <Route path="/products" element={<ProductListingPage addToCart={addToCart} wishlist={wishlist} toggleWishlist={toggleWishlist} />} />
                   <Route path="/products/:id" element={<ProductDetailPage addToCart={addToCart} wishlist={wishlist} toggleWishlist={toggleWishlist} />} />
+                  <Route path="/ai-cue-finder" element={<AICueFinderPage addToCart={addToCart} wishlist={wishlist} toggleWishlist={toggleWishlist} />} />
+                  <Route path="/marketplace" element={<MarketplacePage currentUser={currentUser} />} />
+                  <Route path="/marketplace/:id" element={<MarketplaceDetailPage currentUser={currentUser} />} />
                   <Route path="/cart" element={<CartPage cartItems={cartItems} updateQty={updateQty} removeFromCart={removeFromCart} />} />
                   <Route path="/checkout" element={<CheckoutPage cartItems={cartItems} clearCart={() => setCartItems([])} currentUser={currentUser} />} />
                   <Route path="/account" element={currentUser ? <AccountPage wishlist={wishlist} toggleWishlist={toggleWishlist} addToCart={addToCart} currentUser={currentUser} /> : <Navigate to="/login" replace />} />

@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router";
 import {
   Search, ShoppingCart, Heart, User, Menu, X, ChevronDown,
-  Target, Zap, Package, BookOpen, Circle, Hand
+  Target, Zap, Package, BookOpen, Circle, Hand, Sparkles, Tag
 } from "lucide-react";
 
 const CATEGORIES = [
@@ -17,14 +17,17 @@ const CATEGORIES = [
 
 const BRANDS = ["Predator", "Fury", "Cuetec", "JFlowers", "Kamui", "Mit Cues"];
 
+import { AccountSwitcher } from "./AccountSwitcher";
+
 interface NavbarProps {
   cartCount: number;
   wishlistCount: number;
   currentUser: any;
   onLogout: () => void;
+  onSwitchAccount?: (user: any) => void;
 }
 
-export function Navbar({ cartCount, wishlistCount, currentUser, onLogout }: NavbarProps) {
+export function Navbar({ cartCount, wishlistCount, currentUser, onLogout, onSwitchAccount }: NavbarProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [catOpen, setCatOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -131,6 +134,26 @@ export function Navbar({ cartCount, wishlistCount, currentUser, onLogout }: Navb
         <Link to="/products?sale=true" className="hidden lg:block text-sm font-medium transition-colors" style={{ color: "#22C55E" }}>
           Khuyến mãi
         </Link>
+        <Link 
+          to="/marketplace" 
+          className="hidden lg:flex items-center gap-1.5 text-sm font-semibold transition-colors hover:text-yellow-400" 
+          style={{ color: "#F8FAFC" }}
+        >
+          <Tag className="w-4 h-4 text-yellow-400" />
+          <span>Marketplace</span>
+        </Link>
+        <Link 
+          to="/ai-cue-finder" 
+          className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-sm"
+          style={{ 
+            background: "linear-gradient(135deg, rgba(212,175,55,0.2), rgba(168,137,32,0.1))", 
+            border: "1px solid rgba(212,175,55,0.4)",
+            color: "#FACC15" 
+          }}
+        >
+          <Sparkles className="w-3.5 h-3.5 animate-pulse" />
+          <span>AI Cue Finder</span>
+        </Link>
 
         {/* Search */}
         <form onSubmit={handleSearch} className="flex-1 max-w-md hidden md:flex">
@@ -152,6 +175,10 @@ export function Navbar({ cartCount, wishlistCount, currentUser, onLogout }: Navb
 
         {/* Actions */}
         <div className="flex items-center gap-1.5 ml-auto lg:ml-0">
+          {onSwitchAccount && (
+            <AccountSwitcher currentUser={currentUser} onSwitchAccount={onSwitchAccount} />
+          )}
+
           {currentUser ? (
             <div className="flex items-center gap-2.5">
               <Link
@@ -258,6 +285,24 @@ export function Navbar({ cartCount, wishlistCount, currentUser, onLogout }: Navb
               />
             </div>
           </form>
+          <Link
+            to="/marketplace"
+            className="flex items-center gap-3 text-sm py-2 font-bold"
+            style={{ color: "#F8FAFC" }}
+            onClick={() => setMenuOpen(false)}
+          >
+            <Tag className="w-4 h-4 text-yellow-400" />
+            Marketplace (Chợ Cơ Bida)
+          </Link>
+          <Link
+            to="/ai-cue-finder"
+            className="flex items-center gap-3 text-sm py-2 font-bold"
+            style={{ color: "#FACC15" }}
+            onClick={() => setMenuOpen(false)}
+          >
+            <Sparkles className="w-4 h-4 text-yellow-400" />
+            AI Cue Finder (Tư Vấn Cơ)
+          </Link>
           {CATEGORIES.map((cat) => (
             <Link
               key={cat.label}
