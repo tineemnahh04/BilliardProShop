@@ -140,7 +140,7 @@ export function Navbar({ cartCount, wishlistCount, currentUser, onLogout, onSwit
           style={{ color: "#F8FAFC" }}
         >
           <Tag className="w-4 h-4 text-yellow-400" />
-          <span>Marketplace</span>
+          <span>Chợ Bida</span>
         </Link>
         <Link 
           to="/ai-cue-finder" 
@@ -152,7 +152,7 @@ export function Navbar({ cartCount, wishlistCount, currentUser, onLogout, onSwit
           }}
         >
           <Sparkles className="w-3.5 h-3.5 animate-pulse" />
-          <span>AI Cue Finder</span>
+          <span>Tìm Cơ AI</span>
         </Link>
 
         {/* Search */}
@@ -292,7 +292,7 @@ export function Navbar({ cartCount, wishlistCount, currentUser, onLogout, onSwit
             onClick={() => setMenuOpen(false)}
           >
             <Tag className="w-4 h-4 text-yellow-400" />
-            Marketplace (Chợ Cơ Bida)
+            Chợ Bida (Marketplace)
           </Link>
           <Link
             to="/ai-cue-finder"
@@ -301,7 +301,7 @@ export function Navbar({ cartCount, wishlistCount, currentUser, onLogout, onSwit
             onClick={() => setMenuOpen(false)}
           >
             <Sparkles className="w-4 h-4 text-yellow-400" />
-            AI Cue Finder (Tư Vấn Cơ)
+            Tìm Cơ AI (Cue Finder)
           </Link>
           {CATEGORIES.map((cat) => (
             <Link

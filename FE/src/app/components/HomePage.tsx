@@ -255,7 +255,7 @@ export function HomePage({ addToCart, wishlist, toggleWishlist }: HomePageProps)
                 className="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl font-bold text-sm transition-all hover:brightness-110 shadow-lg shadow-yellow-500/20"
                 style={{ background: "linear-gradient(135deg, #FACC15, #D4AF37)", color: "#0F172A" }}
               >
-                <Sparkles className="w-4 h-4 text-slate-950 animate-pulse" /> AI Cue Finder
+                <Sparkles className="w-4 h-4 text-slate-950 animate-pulse" /> Tìm Cơ Bida AI
               </Link>
               <Link
                 to="/products"
@@ -338,13 +338,13 @@ export function HomePage({ addToCart, wishlist, toggleWishlist }: HomePageProps)
           <div className="absolute -right-20 -top-20 w-80 h-80 rounded-full bg-yellow-500/10 blur-3xl pointer-events-none" />
           <div className="space-y-4 max-w-2xl relative z-10">
             <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full border border-yellow-500/30 bg-yellow-500/10 text-yellow-400 text-xs font-bold uppercase tracking-wider">
-              <Sparkles className="w-3.5 h-3.5 animate-pulse text-yellow-400" /> AI Personal Assistant
+              <Sparkles className="w-3.5 h-3.5 animate-pulse text-yellow-400" /> Trợ Lý AI Cá Nhân Hóa
             </div>
             <h2 className="text-2xl md:text-4xl font-extrabold text-white leading-tight font-display">
               Chưa biết chọn cây cơ nào phù hợp nhất?
             </h2>
             <p className="text-slate-300 text-sm md:text-base leading-relaxed">
-              Trải nghiệm ngay <strong className="text-yellow-400">AI Cue Finder</strong> — Nhập chiều cao, lực đánh, trình độ và ngân sách để nhận tư vấn cây cơ 🎱 hoàn hảo được tối ưu hóa riêng cho bạn trong 30 giây!
+              Trải nghiệm ngay <strong className="text-yellow-400">Công Cụ Tìm Cơ AI</strong> — Nhập chiều cao, lực đánh, trình độ và ngân sách để nhận tư vấn cây cơ 🎱 hoàn hảo được tối ưu hóa riêng cho bạn trong 30 giây!
             </p>
             <div className="pt-2 flex flex-wrap items-center gap-4">
               <Link
@@ -352,7 +352,7 @@ export function HomePage({ addToCart, wishlist, toggleWishlist }: HomePageProps)
                 className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-extrabold text-sm transition-all hover:brightness-110 shadow-lg shadow-yellow-500/20"
                 style={{ background: "linear-gradient(135deg, #FACC15, #D4AF37)", color: "#0F172A" }}
               >
-                <Sparkles className="w-4 h-4 text-slate-950" /> Thử AI Cue Finder Ngay
+                <Sparkles className="w-4 h-4 text-slate-950" /> Tìm Cơ Bida AI Ngay
               </Link>
               <span className="text-xs text-slate-400">✔ Miễn phí 100% · ✔ Tư vấn chính xác dựa trên thông số</span>
             </div>

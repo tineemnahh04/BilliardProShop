@@ -73,13 +73,13 @@ export function MarketplacePage({ currentUser }: MarketplacePageProps) {
         <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
           <div className="space-y-3 max-w-2xl">
             <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full border border-yellow-500/30 bg-yellow-500/10 text-yellow-400 text-xs font-bold uppercase tracking-wider">
-              <Tag className="w-3.5 h-3.5" /> Facebook Marketplace For Billiards
+              <Tag className="w-3.5 h-3.5" /> Chợ Mua Bán Bida Cũ & Mới
             </div>
             <h1 className="text-3xl sm:text-5xl font-extrabold text-white tracking-tight font-display">
-              Billiard <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-amber-200">Marketplace</span>
+              Chợ <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-amber-200">Cơ Bida</span>
             </h1>
             <p className="text-slate-400 text-sm sm:text-base">
-              Chợ trao đổi & mua bán cơ bida lướt hàng đầu Việt Nam. Nơi cơ thủ thỏa sức <strong className="text-white">bán lại cơ, mua cơ cũ, trả giá (Make Offer), đấu giá 3 ngày & trao đổi cơ bù tiền</strong>.
+              Chợ trao đổi & mua bán cơ bida lướt hàng đầu Việt Nam. Nơi cơ thủ thỏa sức <strong className="text-white">bán lại cơ, mua cơ cũ, trả giá, đấu giá 3 ngày & trao đổi cơ bù tiền</strong>.
             </p>
           </div>
 
@@ -87,7 +87,7 @@ export function MarketplacePage({ currentUser }: MarketplacePageProps) {
             onClick={() => setIsSellModalOpen(true)}
             className="flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-gradient-to-r from-yellow-400 via-amber-500 to-yellow-600 text-slate-950 font-extrabold text-sm shadow-xl shadow-yellow-500/20 hover:brightness-110 transition-all cursor-pointer shrink-0"
           >
-            <Plus className="w-5 h-5" /> Sell Your Cue (Đăng bán cơ)
+            <Plus className="w-5 h-5" /> + Đăng Bán Cơ Bida
           </button>
         </div>
       </div>
