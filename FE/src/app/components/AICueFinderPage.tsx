@@ -480,10 +480,10 @@ export function AICueFinderPage({ addToCart }: AICueFinderPageProps) {
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-slate-800">
               <div>
                 <div className="flex items-center gap-2 text-xs text-yellow-400 font-mono font-semibold uppercase tracking-wider">
-                  <ShieldCheck className="w-4 h-4" /> AI Personalized Recommendation
+                  <ShieldCheck className="w-4 h-4" /> AI Tư Vấn Cá Nhân Hóa
                 </div>
                 <h2 className="text-2xl sm:text-3xl font-extrabold text-white mt-1">
-                  🎱 Recommended Cue
+                  🎱 Cơ Bida Đề Xuất Phù Hợp Nhất
                 </h2>
               </div>
               <div className="px-4 py-2 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border border-emerald-500/30 rounded-xl flex items-center gap-2">
@@ -527,7 +527,7 @@ export function AICueFinderPage({ addToCart }: AICueFinderPageProps) {
                 {/* EXACT REQUIRED REASON BOX */}
                 <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-5 space-y-3">
                   <div className="text-sm font-bold text-white flex items-center gap-2">
-                    <CircleDot className="w-4 h-4 text-yellow-400" /> Reason:
+                    <CircleDot className="w-4 h-4 text-yellow-400" /> Lý do lựa chọn:
                   </div>
                   <ul className="space-y-2 text-sm text-slate-300 font-medium">
                     {result.reasons.map((r, i) => (

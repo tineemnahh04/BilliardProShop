@@ -139,9 +139,9 @@ export function MarketplacePage({ currentUser }: MarketplacePageProps) {
               className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white outline-none focus:border-yellow-400"
             >
               <option value="all">Tất cả độ mới</option>
-              <option value="like_new">★★★★★ Like New (99%)</option>
-              <option value="good">★★★★☆ Good (90%)</option>
-              <option value="fair">★★★☆☆ Fair (80%)</option>
+              <option value="like_new">★★★★★ Như Mới (99%)</option>
+              <option value="good">★★★★☆ Tốt (90%)</option>
+              <option value="fair">★★★☆☆ Trung Bình (80%)</option>
             </select>
           </div>
 
@@ -153,9 +153,9 @@ export function MarketplacePage({ currentUser }: MarketplacePageProps) {
               className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white outline-none focus:border-yellow-400"
             >
               <option value="all">Tất cả loại bài</option>
-              <option value="sale">Bán trực tiếp (Sale)</option>
-              <option value="auction">Đấu giá (Auction)</option>
-              <option value="trade">Trao đổi (Trade)</option>
+              <option value="sale">Bán trực tiếp</option>
+              <option value="auction">Đấu giá đếm ngược</option>
+              <option value="trade">Trao đổi cơ</option>
             </select>
           </div>
 
@@ -169,7 +169,7 @@ export function MarketplacePage({ currentUser }: MarketplacePageProps) {
               <option value="newest">Mới nhất</option>
               <option value="price-asc">Giá tăng dần</option>
               <option value="price-desc">Giá giảm dần</option>
-              <option value="rating">Seller uy tín nhất</option>
+              <option value="rating">Người bán uy tín nhất</option>
             </select>
           </div>
         </div>
@@ -204,7 +204,7 @@ export function MarketplacePage({ currentUser }: MarketplacePageProps) {
             onClick={() => setIsSellModalOpen(true)}
             className="px-5 py-2.5 bg-yellow-400 text-slate-950 font-bold text-xs rounded-xl hover:bg-yellow-300 transition-colors"
           >
-            + Sell Your Cue Ngay
+            + Đăng Bán Cơ Ngay
           </button>
         </div>
       )}
@@ -233,13 +233,13 @@ export function MarketplacePage({ currentUser }: MarketplacePageProps) {
                       ? "bg-blue-600 text-white" 
                       : "bg-emerald-600 text-white"
                   }`}>
-                    {item.listingType === 'auction' ? '⚡ Đấu giá (Auction)' : item.listingType === 'trade' ? '🔄 Trao đổi (Trade)' : '🛒 Bán (Sale)'}
+                    {item.listingType === 'auction' ? '⚡ Đấu giá' : item.listingType === 'trade' ? '🔄 Trao đổi' : '🛒 Đang Bán'}
                   </span>
                 </div>
 
                 <div className="absolute bottom-3 right-3 bg-slate-950/80 backdrop-blur-md text-yellow-400 px-2.5 py-1 rounded-lg text-xs font-bold flex items-center gap-1 border border-slate-800">
                   <Star className="w-3.5 h-3.5 fill-yellow-400" />
-                  <span>{item.condition?.label || "Like New"}</span>
+                  <span>{item.condition?.label || "Như Mới"}</span>
                 </div>
               </div>
 
@@ -286,7 +286,7 @@ export function MarketplacePage({ currentUser }: MarketplacePageProps) {
                     to={`/marketplace/${item.id}?action=offer`}
                     className="flex items-center justify-center px-3 py-2 rounded-xl bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 font-extrabold text-xs hover:brightness-110 transition-all cursor-pointer"
                   >
-                    Make Offer
+                    Trả Giá
                   </Link>
                 </div>
               </div>

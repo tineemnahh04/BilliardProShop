@@ -413,7 +413,7 @@ export function MarketplaceDetailPage({ currentUser }: MarketplaceDetailPageProp
                   onClick={() => setShowOfferModal(true)}
                   className="py-3.5 px-4 rounded-xl bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 font-extrabold text-sm hover:brightness-110 transition-all cursor-pointer shadow-lg shadow-yellow-500/10 flex items-center justify-center gap-2"
                 >
-                  <Tag className="w-4 h-4" /> Make Offer (Trả giá)
+                  <Tag className="w-4 h-4" /> Trả Giá / Thương Lượng
                 </button>
                 <button
                   onClick={() => setShowChatModal(true)}
@@ -430,7 +430,7 @@ export function MarketplaceDetailPage({ currentUser }: MarketplaceDetailPageProp
                   onClick={() => setShowTradeModal(true)}
                   className="py-3.5 px-4 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-extrabold text-sm hover:brightness-110 transition-all cursor-pointer flex items-center justify-center gap-2"
                 >
-                  <RefreshCw className="w-4 h-4" /> Propose Trade (Đổi cơ)
+                  <RefreshCw className="w-4 h-4" /> Đề Xuất Trao Đổi Cơ
                 </button>
                 <button
                   onClick={() => setShowChatModal(true)}
@@ -446,7 +446,7 @@ export function MarketplaceDetailPage({ currentUser }: MarketplaceDetailPageProp
                 onClick={() => setShowBidModal(true)}
                 className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-purple-500 to-violet-600 text-white font-extrabold text-sm hover:brightness-110 transition-all cursor-pointer flex items-center justify-center gap-2"
               >
-                <Sparkles className="w-4 h-4" /> Place Bid (Đặt Giá Đấu Giá)
+                <Sparkles className="w-4 h-4" /> Đặt Giá Đấu Giá
               </button>
             )}
           </div>
@@ -502,7 +502,7 @@ export function MarketplaceDetailPage({ currentUser }: MarketplaceDetailPageProp
                         }}
                         className="flex-1 py-1.5 bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs rounded-lg transition-colors"
                       >
-                        💬 Counter
+                        💬 Giá Khác
                       </button>
                     </>
                   )}
@@ -538,7 +538,7 @@ export function MarketplaceDetailPage({ currentUser }: MarketplaceDetailPageProp
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
           <div className="bg-slate-900 border border-yellow-500/30 rounded-2xl w-full max-w-md p-6 space-y-5 shadow-2xl">
             <h3 className="text-lg font-bold text-white flex items-center gap-2">
-              <Tag className="w-5 h-5 text-yellow-400" /> Make Offer (Trả Giá)
+              <Tag className="w-5 h-5 text-yellow-400" /> Trả Giá / Thương Lượng Giá
             </h3>
             <p className="text-xs text-slate-400">Giá niêm yết: <strong className="text-yellow-400">{formatPriceVND(item.price)}</strong></p>
             <form onSubmit={handleMakeOffer} className="space-y-4">
@@ -575,7 +575,7 @@ export function MarketplaceDetailPage({ currentUser }: MarketplaceDetailPageProp
                   type="submit"
                   className="px-5 py-2 rounded-xl bg-yellow-400 text-slate-950 font-bold text-xs hover:bg-yellow-300"
                 >
-                  Gửi Make Offer
+                  Gửi Mức Giá Trả
                 </button>
               </div>
             </form>
@@ -588,7 +588,7 @@ export function MarketplaceDetailPage({ currentUser }: MarketplaceDetailPageProp
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
           <div className="bg-slate-900 border border-blue-500/30 rounded-2xl w-full max-w-md p-6 space-y-5 shadow-2xl">
             <h3 className="text-lg font-bold text-white flex items-center gap-2">
-              <RefreshCw className="w-5 h-5 text-blue-400" /> Propose Trade (Đề Xuất Đổi Cơ)
+              <RefreshCw className="w-5 h-5 text-blue-400" /> Đề Xuất Trao Đổi Cơ Bida
             </h3>
             <form onSubmit={handleProposeTrade} className="space-y-4">
               <div>

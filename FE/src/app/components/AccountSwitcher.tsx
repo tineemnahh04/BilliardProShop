@@ -8,7 +8,7 @@ export const PRESET_ACCOUNTS = [
     email: "hung.mezz@email.com",
     role: "customer",
     phone: "0908123456",
-    tag: "Seller (Chủ cây cơ Mezz EC9)",
+    tag: "Người Bán (Chủ cây cơ Mezz EC9)",
     avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop"
   },
   {
@@ -17,7 +17,7 @@ export const PRESET_ACCOUNTS = [
     email: "quocanh@email.com",
     role: "customer",
     phone: "0987654321",
-    tag: "Seller (Chủ cơ Predator Aspire)",
+    tag: "Người Bán (Chủ cơ Predator Aspire)",
     avatar: "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=100&h=100&fit=crop"
   },
   {
@@ -26,7 +26,7 @@ export const PRESET_ACCOUNTS = [
     email: "customer@email.com",
     role: "customer",
     phone: "+84 912 345 678",
-    tag: "Buyer (Người mua bida)",
+    tag: "Người Mua (Khách hàng chính)",
     avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop"
   },
   {
@@ -35,7 +35,7 @@ export const PRESET_ACCOUNTS = [
     email: "tuan.le@email.com",
     role: "customer",
     phone: "0912345678",
-    tag: "Bidder (Người trả giá 7.0M)",
+    tag: "Người Đặt Giá (Trả giá 7.0 triệu)",
     avatar: "https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=100&h=100&fit=crop"
   },
   {
@@ -44,7 +44,7 @@ export const PRESET_ACCOUNTS = [
     email: "admin@email.com",
     role: "admin",
     phone: "0900000000",
-    tag: "Admin (Quản trị viên)",
+    tag: "Quản Trị Viên Hệ Thống",
     avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop"
   }
 ];

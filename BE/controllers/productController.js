@@ -284,36 +284,36 @@ export const productController = {
       const matchPercentage = Math.min(99, Math.max(85, topItem.score));
 
       const skillTextMap = {
-        beginner: 'Suitable for beginners',
-        intermediate: 'Suitable for intermediate players',
-        advanced: 'Suitable for advanced & pro players'
+        beginner: 'Phù hợp cho người mới bắt đầu tập chơi bida',
+        intermediate: 'Phù hợp cho cơ thủ trung cấp nâng cao kỹ năng điều bi',
+        advanced: 'Phù hợp cho cơ thủ khá giỏi & thi đấu chuyên nghiệp'
       };
 
       const strokeTextMap = {
-        light: 'Soft hit feel with smooth cueing speed',
-        medium: 'Medium hit feel & balanced weight',
-        strong: 'Solid stiff hit feel with max power transfer',
-        break: 'Explosive hit for break shots'
+        light: 'Cảm giác chạm bi mềm mại, tốc độ ra cơ êm ái',
+        medium: 'Cảm giác đánh lực vừa & phân bổ trọng lượng cân bằng',
+        strong: 'Ngọn cứng cáp cho cú phát lực mạnh & truyền lực tối đa',
+        break: 'Lực phá bùng nổ chuyên dụng cho cú mở ván'
       };
 
       const heightTextMap = {
-        under_160: 'Easy control (18.5 - 19.0 oz weight)',
-        '160_175': 'Easy control (19.0 - 19.5 oz weight)',
-        above_175: 'Comfortable reach (19.5 - 20.0 oz weight)'
+        under_160: 'Dễ dàng kiểm soát điều bi (Trọng lượng 18.5 - 19.0 oz)',
+        '160_175': 'Dễ dàng kiểm soát điều bi (Trọng lượng 19.0 - 19.5 oz)',
+        above_175: 'Tầm với thoải mái (Trọng lượng 19.5 - 20.0 oz)'
       };
 
       let budgetLabel = '';
       const numBudget = parseFloat(maxBudget) || 6000000;
       if (numBudget > 10000) {
-        budgetLabel = `Budget under ${(numBudget / 1000000).toFixed(0)} million VND`;
+        budgetLabel = `Hợp lý trong tầm ngân sách dưới ${(numBudget / 1000000).toFixed(0)} triệu VNĐ`;
       } else {
-        budgetLabel = `Budget under $${budgetUsd.toFixed(0)}`;
+        budgetLabel = `Hợp lý trong tầm ngân sách dưới $${budgetUsd.toFixed(0)}`;
       }
 
       const reasons = [
-        `✔ ${skillTextMap[skillLevel] || 'Suitable for beginners'}`,
-        `✔ ${strokeTextMap[strokePower] || 'Medium hit feel'}`,
-        `✔ ${heightTextMap[height] || 'Easy control'}`,
+        `✔ ${skillTextMap[skillLevel] || 'Phù hợp cho người mới bắt đầu'}`,
+        `✔ ${strokeTextMap[strokePower] || 'Cảm giác đánh lực vừa'}`,
+        `✔ ${heightTextMap[height] || 'Dễ kiểm soát cơ'}`,
         `✔ ${budgetLabel}`
       ];
 

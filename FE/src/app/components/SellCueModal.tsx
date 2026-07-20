@@ -238,15 +238,15 @@ export function SellCueModal({ isOpen, onClose, onSuccess, currentUser }: SellCu
                 onChange={(e) => {
                   const s = Number(e.target.value);
                   setConditionStars(s);
-                  if (s === 5) setConditionLabel("Like New (99%)");
-                  else if (s === 4) setConditionLabel("Good (90%)");
-                  else setConditionLabel("Fair (80%)");
+                  if (s === 5) setConditionLabel("Như Mới (99%)");
+                  else if (s === 4) setConditionLabel("Tốt (90%)");
+                  else setConditionLabel("Trung Bình (80%)");
                 }}
                 className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm outline-none focus:border-yellow-400"
               >
-                <option value={5}>★★★★★ Like New (99%)</option>
-                <option value={4}>★★★★☆ Good (90%)</option>
-                <option value={3}>★★★☆☆ Fair (80%)</option>
+                <option value={5}>★★★★★ Như Mới (99%)</option>
+                <option value={4}>★★★★☆ Tốt (90%)</option>
+                <option value={3}>★★★☆☆ Trung Bình (80%)</option>
               </select>
             </div>
           </div>
