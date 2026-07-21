@@ -44,6 +44,7 @@ export function MarketplaceDetailPage({ currentUser }: MarketplaceDetailPageProp
   // Counter offer state for Seller
   const [counteringOfferId, setCounteringOfferId] = useState<string | null>(null);
   const [counterAmountInput, setCounterAmountInput] = useState("");
+  const [counterNoteInput, setCounterNoteInput] = useState("");
 
   const fetchItemDetail = async () => {
     setLoading(true);
@@ -174,13 +175,15 @@ export function MarketplaceDetailPage({ currentUser }: MarketplaceDetailPageProp
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           action,
-          counterAmount: action === "counter" ? Number(counterAmountInput) : 0
+          counterAmount: action === "counter" ? Number(counterAmountInput) : 0,
+          counterNote: action === "counter" ? counterNoteInput : ""
         })
       });
 
       if (!response.ok) throw new Error("Lỗi khi phản hồi trả giá.");
       alert("Đã cập nhật phản hồi offer thành công!");
       setCounteringOfferId(null);
+      setCounterNoteInput("");
       fetchItemDetail();
     } catch (err: any) {
       alert(err.message);
@@ -479,9 +482,22 @@ export function MarketplaceDetailPage({ currentUser }: MarketplaceDetailPageProp
                 </div>
                 {off.note && <p className="text-xs text-slate-400 italic">"{off.note}"</p>}
 
+                {off.status === 'countered' && off.counterAmount && (
+                  <div className="p-2.5 bg-amber-500/10 border border-amber-500/20 rounded-lg text-xs space-y-1 mt-2">
+                    <div className="text-amber-400 font-bold">
+                      Đề xuất lại: {formatPriceVND(off.counterAmount)}
+                    </div>
+                    {off.counterNote && (
+                      <div className="text-slate-300 italic">
+                        "{off.counterNote}"
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 {/* Seller Controls */}
                 <div className="flex items-center gap-2 pt-2 border-t border-slate-800/80">
-                  {off.status === 'pending' && (
+                  {off.status === 'pending' && counteringOfferId !== off.id && (
                     <>
                       <button
                         onClick={() => handleRespondOffer(off.id, 'accept')}
@@ -499,6 +515,7 @@ export function MarketplaceDetailPage({ currentUser }: MarketplaceDetailPageProp
                         onClick={() => {
                           setCounteringOfferId(off.id);
                           setCounterAmountInput(String(off.offerAmount));
+                          setCounterNoteInput("");
                         }}
                         className="flex-1 py-1.5 bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs rounded-lg transition-colors"
                       >
@@ -508,20 +525,44 @@ export function MarketplaceDetailPage({ currentUser }: MarketplaceDetailPageProp
                   )}
 
                   {counteringOfferId === off.id && (
-                    <div className="w-full space-y-2 pt-2">
-                      <input
-                        type="number"
-                        placeholder="Mức giá đề xuất lại (VNĐ)"
-                        value={counterAmountInput}
-                        onChange={(e) => setCounterAmountInput(e.target.value)}
-                        className="w-full px-3 py-1.5 bg-slate-950 border border-slate-800 text-white text-xs rounded-lg"
-                      />
-                      <button
-                        onClick={() => handleRespondOffer(off.id, 'counter')}
-                        className="w-full py-1.5 bg-amber-500 text-slate-950 font-bold text-xs rounded-lg"
-                      >
-                        Gửi Đề Xuất Phản Hồi
-                      </button>
+                    <div className="w-full space-y-2 pt-1">
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-400 mb-1">Mức giá đề xuất lại (VNĐ)</label>
+                        <input
+                          type="number"
+                          placeholder="Nhập mức giá (VNĐ)"
+                          value={counterAmountInput}
+                          onChange={(e) => setCounterAmountInput(e.target.value)}
+                          className="w-full px-3 py-1.5 bg-slate-950 border border-slate-800 text-white text-xs rounded-lg outline-none focus:border-amber-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-400 mb-1">Lời nhắn kèm theo</label>
+                        <textarea
+                          rows={2}
+                          placeholder="Lời nhắn cho người mua (ví dụ: Giá này bớt kịch sàn rồi nhé!)..."
+                          value={counterNoteInput}
+                          onChange={(e) => setCounterNoteInput(e.target.value)}
+                          className="w-full px-3 py-1.5 bg-slate-950 border border-slate-800 text-white text-xs rounded-lg outline-none focus:border-amber-500 resize-none"
+                        />
+                      </div>
+                      <div className="flex gap-2 pt-1">
+                        <button
+                          onClick={() => handleRespondOffer(off.id, 'counter')}
+                          className="flex-1 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs rounded-lg transition-colors"
+                        >
+                          Gửi Đề Xuất Phản Hồi
+                        </button>
+                        <button
+                          onClick={() => {
+                            setCounteringOfferId(null);
+                            setCounterNoteInput("");
+                          }}
+                          className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-lg transition-colors"
+                        >
+                          Hủy
+                        </button>
+                      </div>
                     </div>
                   )}
                 </div>

@@ -283,7 +283,7 @@ export const marketplaceController = {
     try {
       const id = parseInt(req.params.id);
       const offerId = req.params.offerId;
-      const { action, counterAmount } = req.body; // action: 'accept', 'reject', 'counter'
+      const { action, counterAmount, counterNote } = req.body; // action: 'accept', 'reject', 'counter'
 
       const item = await MarketplaceItem.findOne({ id });
       if (!item) return res.status(404).json({ message: 'Không tìm thấy bài đăng' });
@@ -298,6 +298,7 @@ export const marketplaceController = {
       } else if (action === 'counter') {
         offer.status = 'countered';
         offer.counterAmount = parseFloat(counterAmount) || offer.offerAmount;
+        offer.counterNote = counterNote || '';
       }
 
       await item.save();

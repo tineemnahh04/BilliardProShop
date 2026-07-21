@@ -9,6 +9,7 @@ const OfferSchema = new mongoose.Schema({
   note: { type: String, default: '' },
   status: { type: String, enum: ['pending', 'accepted', 'rejected', 'countered'], default: 'pending' },
   counterAmount: { type: Number, default: 0 },
+  counterNote: { type: String, default: '' },
   createdAt: { type: Date, default: Date.now }
 }, { _id: false });
 

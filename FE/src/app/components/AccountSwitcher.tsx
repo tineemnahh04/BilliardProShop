@@ -10,7 +10,8 @@ export const PRESET_ACCOUNTS = [
     role: "customer",
     phone: "0908123456",
     tag: "Người Bán (Chủ cây cơ Mezz EC9)",
-    avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop"
+    avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop",
+    wishlist: [1]
   },
   {
     userId: "user_pro_2",
@@ -19,7 +20,8 @@ export const PRESET_ACCOUNTS = [
     role: "customer",
     phone: "0987654321",
     tag: "Người Bán (Chủ cơ Predator Aspire)",
-    avatar: "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=100&h=100&fit=crop"
+    avatar: "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=100&h=100&fit=crop",
+    wishlist: [3]
   },
   {
     userId: "buyer_marcus",
@@ -28,7 +30,8 @@ export const PRESET_ACCOUNTS = [
     role: "customer",
     phone: "+84 912 345 678",
     tag: "Người Mua (Khách hàng chính)",
-    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop"
+    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop",
+    wishlist: [2, 5]
   },
   {
     userId: "buyer_10",
@@ -37,7 +40,8 @@ export const PRESET_ACCOUNTS = [
     role: "customer",
     phone: "0912345678",
     tag: "Người Đặt Giá (Trả giá 7.0 triệu)",
-    avatar: "https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=100&h=100&fit=crop"
+    avatar: "https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=100&h=100&fit=crop",
+    wishlist: [4]
   },
   {
     userId: "admin_pro",
@@ -46,7 +50,8 @@ export const PRESET_ACCOUNTS = [
     role: "admin",
     phone: "0900000000",
     tag: "Quản Trị Viên Hệ Thống",
-    avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop"
+    avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop",
+    wishlist: []
   }
 ];
 
@@ -72,6 +77,14 @@ export function AccountSwitcher({ currentUser, onSwitchAccount, onLogout }: Acco
   }, [open]);
 
   const handleSelect = (acc: typeof PRESET_ACCOUNTS[0]) => {
+    const savedWishlist = localStorage.getItem(`wishlist_${acc.userId}`);
+    let userWishlist = acc.wishlist || [];
+    if (savedWishlist) {
+      try {
+        userWishlist = JSON.parse(savedWishlist);
+      } catch (e) {}
+    }
+
     const newUser = {
       id: acc.userId,
       userId: acc.userId,
@@ -80,7 +93,7 @@ export function AccountSwitcher({ currentUser, onSwitchAccount, onLogout }: Acco
       role: acc.role,
       phone: acc.phone,
       avatar: acc.avatar,
-      wishlist: [2, 5]
+      wishlist: userWishlist
     };
 
     localStorage.setItem("user", JSON.stringify(newUser));

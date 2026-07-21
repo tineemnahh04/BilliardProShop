@@ -7,6 +7,7 @@ interface CartPageProps {
   cartItems: CartItem[];
   updateQty: (id: number, qty: number) => void;
   removeFromCart: (id: number) => void;
+  addToCart: (item: CartItem) => void;
 }
 
 const SUGGESTED = [
@@ -15,7 +16,7 @@ const SUGGESTED = [
   { id: 11, name: "Đầu Tẩy Bida Kamui Clear Tip Soft", brand: "Kamui", price: 19.99, image: "https://images.unsplash.com/photo-1544281153-6603be88b354?w=200&h=200&fit=crop" },
 ];
 
-export function CartPage({ cartItems, updateQty, removeFromCart }: CartPageProps) {
+export function CartPage({ cartItems, updateQty, removeFromCart, addToCart }: CartPageProps) {
   const [coupon, setCoupon] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState("");
   const [couponError, setCouponError] = useState("");
@@ -166,7 +167,9 @@ export function CartPage({ cartItems, updateQty, removeFromCart }: CartPageProps
               </div>
               {discount > 0 && (
                 <div className="flex justify-between text-sm">
-                  <span style={{ color: "#22C55E" }}>Mã giảm giá (PROSHOT -10%)</span>
+                  <span style={{ color: "#22C55E" }}>
+                    Mã giảm giá ({appliedCoupon || "MÃ GIẢM GIÁ"} -{discountType === "percentage" ? `${discountValue}%` : `$${discountValue}`})
+                  </span>
                   <span style={{ color: "#22C55E" }}>-${discount.toFixed(2)}</span>
                 </div>
               )}

@@ -27,31 +27,107 @@ export type CartItem = {
 };
 
 export default function App() {
-  const [cartItems, setCartItems] = useState<CartItem[]>([
-    {
-      id: 1,
-      name: "Predator 2SE 4-Point Pool Cue",
-      brand: "Predator",
-      price: 349.99,
-      image: "https://images.unsplash.com/photo-1599685315659-bc876da49fe5?w=300&h=300&fit=crop",
-      quantity: 1,
-      variant: "19oz / Z-3 Shaft",
-    },
-  ]);
-  const [wishlist, setWishlist] = useState<number[]>([]);
   const [currentUser, setCurrentUser] = useState<any>(() => {
     const saved = localStorage.getItem("user");
     return saved ? JSON.parse(saved) : null;
   });
 
-  // Sync wishlist when user logs in or out
+  const getUserKey = (user: any) => {
+    if (!user) return "guest";
+    return String(user.id || user.userId || user.email || "guest");
+  };
+
+  const userKey = getUserKey(currentUser);
+
+  const [cartItems, setCartItems] = useState<CartItem[]>(() => {
+    const saved = localStorage.getItem(`cart_${userKey}`);
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {}
+    }
+    if (userKey === "buyer_marcus" || userKey === "guest" || userKey === "customer@email.com") {
+      return [
+        {
+          id: 1,
+          name: "Predator 2SE 4-Point Pool Cue",
+          brand: "Predator",
+          price: 349.99,
+          image: "https://images.unsplash.com/photo-1599685315659-bc876da49fe5?w=300&h=300&fit=crop",
+          quantity: 1,
+          variant: "19oz / Z-3 Shaft",
+        },
+      ];
+    }
+    return [];
+  });
+
+  const [wishlist, setWishlist] = useState<number[]>(() => {
+    const saved = localStorage.getItem(`wishlist_${userKey}`);
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {}
+    }
+    return currentUser?.wishlist || [];
+  });
+
+  // Sync cart and wishlist when currentUser changes
   useEffect(() => {
-    if (currentUser && currentUser.wishlist) {
+    const key = getUserKey(currentUser);
+
+    // Sync cart
+    const savedCart = localStorage.getItem(`cart_${key}`);
+    if (savedCart) {
+      try {
+        setCartItems(JSON.parse(savedCart));
+      } catch (e) {
+        setCartItems([]);
+      }
+    } else {
+      if (key === "buyer_marcus" || key === "guest" || key === "customer@email.com") {
+        setCartItems([
+          {
+            id: 1,
+            name: "Predator 2SE 4-Point Pool Cue",
+            brand: "Predator",
+            price: 349.99,
+            image: "https://images.unsplash.com/photo-1599685315659-bc876da49fe5?w=300&h=300&fit=crop",
+            quantity: 1,
+            variant: "19oz / Z-3 Shaft",
+          },
+        ]);
+      } else {
+        setCartItems([]);
+      }
+    }
+
+    // Sync wishlist
+    const savedWishlist = localStorage.getItem(`wishlist_${key}`);
+    if (savedWishlist) {
+      try {
+        setWishlist(JSON.parse(savedWishlist));
+      } catch (e) {
+        setWishlist(currentUser?.wishlist || []);
+      }
+    } else if (currentUser && Array.isArray(currentUser.wishlist)) {
       setWishlist(currentUser.wishlist);
     } else {
       setWishlist([]);
     }
   }, [currentUser]);
+
+  // Persist cart to localStorage whenever cartItems changes
+  useEffect(() => {
+    const key = getUserKey(currentUser);
+    localStorage.setItem(`cart_${key}`, JSON.stringify(cartItems));
+  }, [cartItems, currentUser]);
+
+  // Persist wishlist to localStorage whenever wishlist changes
+  useEffect(() => {
+    const key = getUserKey(currentUser);
+    localStorage.setItem(`wishlist_${key}`, JSON.stringify(wishlist));
+  }, [wishlist, currentUser]);
 
   const addToCart = (item: CartItem) => {
     setCartItems((prev) => {
@@ -78,29 +154,45 @@ export default function App() {
       alert("Vui lòng đăng nhập để sử dụng tính năng yêu thích!");
       return;
     }
-    fetch('/api/auth/wishlist', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('token') || ''}`
-      },
-      body: JSON.stringify({ productId: id })
-    })
-      .then(res => {
-        if (!res.ok) throw new Error("Lỗi cập nhật wishlist");
-        return res.json();
+
+    const nextWishlist = wishlist.includes(id)
+      ? wishlist.filter((item) => item !== id)
+      : [...wishlist, id];
+
+    setWishlist(nextWishlist);
+
+    const key = getUserKey(currentUser);
+    const updatedUser = { ...currentUser, wishlist: nextWishlist };
+    localStorage.setItem("user", JSON.stringify(updatedUser));
+    localStorage.setItem(`wishlist_${key}`, JSON.stringify(nextWishlist));
+    setCurrentUser(updatedUser);
+
+    const token = localStorage.getItem('token');
+    if (token) {
+      fetch('/api/auth/wishlist', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ productId: id })
       })
-      .then(data => {
-        if (data.wishlist) {
-          setWishlist(data.wishlist);
-          const updatedUser = { ...currentUser, wishlist: data.wishlist };
-          localStorage.setItem("user", JSON.stringify(updatedUser));
-          setCurrentUser(updatedUser);
-        }
-      })
-      .catch(err => {
-        console.error("Lỗi cập nhật wishlist:", err);
-      });
+        .then(res => {
+          if (!res.ok) throw new Error("Lỗi cập nhật wishlist");
+          return res.json();
+        })
+        .then(data => {
+          if (data.wishlist) {
+            setWishlist(data.wishlist);
+            const syncedUser = { ...currentUser, wishlist: data.wishlist };
+            localStorage.setItem("user", JSON.stringify(syncedUser));
+            localStorage.setItem(`wishlist_${key}`, JSON.stringify(data.wishlist));
+          }
+        })
+        .catch(err => {
+          console.log("Cập nhật wishlist server:", err);
+        });
+    }
   };
 
   const handleLoginSuccess = (user: any) => {
@@ -140,7 +232,7 @@ export default function App() {
                   <Route path="/blind-box" element={<BlindBoxPage addToCart={addToCart} currentUser={currentUser} />} />
                   <Route path="/marketplace" element={<MarketplacePage currentUser={currentUser} />} />
                   <Route path="/marketplace/:id" element={<MarketplaceDetailPage currentUser={currentUser} />} />
-                  <Route path="/cart" element={<CartPage cartItems={cartItems} updateQty={updateQty} removeFromCart={removeFromCart} />} />
+                  <Route path="/cart" element={<CartPage cartItems={cartItems} updateQty={updateQty} removeFromCart={removeFromCart} addToCart={addToCart} />} />
                   <Route path="/checkout" element={<CheckoutPage cartItems={cartItems} clearCart={() => setCartItems([])} currentUser={currentUser} />} />
                   <Route path="/account" element={currentUser ? <AccountPage wishlist={wishlist} toggleWishlist={toggleWishlist} addToCart={addToCart} currentUser={currentUser} /> : <Navigate to="/login" replace />} />
                   <Route path="/login" element={<AuthPage onLoginSuccess={handleLoginSuccess} />} />
