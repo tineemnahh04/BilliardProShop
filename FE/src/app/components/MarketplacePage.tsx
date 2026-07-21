@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router";
-import { 
-  Search, Plus, MapPin, Star, Tag, Sparkles, Filter, 
+import {
+  Search, Plus, MapPin, Star, Tag, Sparkles, Filter,
   Flame, RefreshCw, MessageSquare, ShieldCheck, DollarSign, ArrowUpDown
 } from "lucide-react";
 import { SellCueModal } from "./SellCueModal";
@@ -69,7 +69,7 @@ export function MarketplacePage({ currentUser }: MarketplacePageProps) {
       {/* Top Hero Banner */}
       <div className="relative rounded-3xl p-8 sm:p-12 mb-10 overflow-hidden border border-yellow-500/20 bg-gradient-to-r from-slate-900 via-slate-900 to-slate-950 shadow-2xl">
         <div className="absolute -right-20 -bottom-20 w-80 h-80 bg-yellow-500/10 rounded-full blur-3xl pointer-events-none" />
-        
+
         <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
           <div className="space-y-3 max-w-2xl">
             <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full border border-yellow-500/30 bg-yellow-500/10 text-yellow-400 text-xs font-bold uppercase tracking-wider">
@@ -87,7 +87,7 @@ export function MarketplacePage({ currentUser }: MarketplacePageProps) {
             onClick={() => setIsSellModalOpen(true)}
             className="flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-gradient-to-r from-yellow-400 via-amber-500 to-yellow-600 text-slate-950 font-extrabold text-sm shadow-xl shadow-yellow-500/20 hover:brightness-110 transition-all cursor-pointer shrink-0"
           >
-            <Plus className="w-5 h-5" /> + Đăng Bán Cơ Bida
+            <Plus className="w-5 h-5" /> Đăng Bán Cơ Bida
           </button>
         </div>
       </div>
@@ -204,7 +204,7 @@ export function MarketplacePage({ currentUser }: MarketplacePageProps) {
             onClick={() => setIsSellModalOpen(true)}
             className="px-5 py-2.5 bg-yellow-400 text-slate-950 font-bold text-xs rounded-xl hover:bg-yellow-300 transition-colors"
           >
-            + Đăng Bán Cơ Ngay
+            Đăng Bán Cơ Ngay
           </button>
         </div>
       )}
@@ -223,16 +223,15 @@ export function MarketplacePage({ currentUser }: MarketplacePageProps) {
                   alt={item.title}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
-                
+
                 {/* Badges Overlay */}
                 <div className="absolute top-3 left-3 flex flex-wrap gap-1.5">
-                  <span className={`px-2.5 py-1 rounded-lg text-[10px] font-extrabold uppercase tracking-wider ${
-                    item.listingType === 'auction' 
-                      ? "bg-purple-600 text-white" 
-                      : item.listingType === 'trade' 
-                      ? "bg-blue-600 text-white" 
+                  <span className={`px-2.5 py-1 rounded-lg text-[10px] font-extrabold uppercase tracking-wider ${item.listingType === 'auction'
+                    ? "bg-purple-600 text-white"
+                    : item.listingType === 'trade'
+                      ? "bg-blue-600 text-white"
                       : "bg-emerald-600 text-white"
-                  }`}>
+                    }`}>
                     {item.listingType === 'auction' ? '⚡ Đấu giá' : item.listingType === 'trade' ? '🔄 Trao đổi' : '🛒 Đang Bán'}
                   </span>
                 </div>
